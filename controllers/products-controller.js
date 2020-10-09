@@ -1,6 +1,8 @@
-const HttpError = require("../models/http-error");
-const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
+const { v4: uuidv4 } = require("uuid");
+
+const HttpError = require("../models/http-error");
+const Product = require("../models/product");
 
 let DUMMY_PRODUCTS = [
   {
@@ -87,35 +89,60 @@ let DUMMY_PRODUCTS = [
 
 /* Get Product (Link) by product Id */
 
-const getProductById = (req, res, next) => {
+const getProductById = async (req, res, next) => {
   const productId = req.params.pid; // { pid: 'p1' }
 
-  const product = DUMMY_PRODUCTS.find((p) => {
-    return p.id === productId;
-  });
+  let product;
+  try {
+    product = await Product.findById(productId);
+  } catch (err) {
+    const error = new HttpError(
+      "Could not find any products for the provided ID",
+      500
+    );
+    return next(error);
+  }
 
   if (!product) {
     const error = new HttpError("Could not find a product for that ID.", 404);
     return next(error);
   }
 
-  res.json({ product }); // => {product} => {product: product}
+  res.json({ product: product.toObject({ getters: true }) }); // => {product} => {product: product}
 };
 
 /* Get List of all products */
 
-const getAllProducts = (req, res, next ) => {
-  res.json({ products: DUMMY_PRODUCTS })
-}
+const getAllProducts = async (req, res, next) => {
+  let products;
+  try {
+    products = await Product.find();
+  } catch (err) {
+    const error = new HttpError(
+      "Could not fetch any products, please try again in few moments",
+      404
+    );
+    return next(error);
+  }
+
+  res.json({ products });
+};
 
 /* Get Product (Link) by user Id (productCreator id) */
 
-const getProductsByUserId = (req, res, next) => {
+const getProductsByUserId = async (req, res, next) => {
   const userId = req.params.uid;
 
-  const products = DUMMY_PRODUCTS.filter((u) => {
-    return u.productCreator === userId;
-  });
+  let products;
+  try {
+    products = await Product.find({ productCreator: userId });
+  } catch (err) {
+    const error = new HttpError(
+      "Fetching products failed for the provided user ID, please try again in few moments.",
+      500
+    );
+    return next(error);
+  }
 
   if (!products || products.length === 0) {
     const error = new HttpError(
@@ -125,22 +152,28 @@ const getProductsByUserId = (req, res, next) => {
     return next(error);
   }
 
-  res.json({ products }); // => {user} => {user: user}
+  res.json({
+    products: products.map((product) => product.toObject({ getters: true })),
+  }); // => {user} => {user: user}
 };
 
 /* Create New Product */
-const createProduct = (req, res, next) => {
-
+const createProduct = async (req, res, next) => {
   const errors = validationResult(req); // Part of express-validator to check valiadtion for inputs
 
   if (!errors.isEmpty()) {
-    throw new HttpError("Invalid inputs passed please check the data again.", 422)
+    const error = new HttpError(
+      "Invalid inputs passed please check the data again.",
+      422
+    );
+    return next(error);
   }
 
   const {
     productTitle,
     productDescription,
     productPrice,
+    productNumInStock,
     productCategory,
     productSizes,
     productColors,
@@ -153,11 +186,11 @@ const createProduct = (req, res, next) => {
 
   // const producTitle = req.body.productTitle;
 
-  const createdProduct = {
-    id: uuidv4(),
+  const createdProduct = new Product({
     productTitle,
     productDescription,
     productPrice,
+    productNumInStock,
     productCategory,
     productSizes,
     productColors,
@@ -166,25 +199,37 @@ const createProduct = (req, res, next) => {
     productSizeFit,
     productImages,
     productCreator,
-  };
+  });
 
-  DUMMY_PRODUCTS.unshift(createdProduct); // <push> if we want to make it to be the last element to be added
+  try {
+    await createdProduct.save(); // Create New Product using save() method from mongoose
+  } catch (err) {
+    const error = new HttpError(
+      "Creating product failed, please try again",
+      500
+    );
+    return next(error);
+  }
 
   res.status(201).json({ product: createdProduct });
 };
 
 /* Update Product */
-const updateProduct = (req, res, next) => {
-
+const updateProduct = async (req, res, next) => {
   const errors = validationResult(req); // Part of express-validator to check valiadtion for inputs
   if (!errors.isEmpty()) {
-    throw new HttpError("Update Failed due to invalid inputs please check the data in the input fields again.", 422 )
+    const error = new HttpError(
+      "Update Failed due to invalid inputs please check the data in the input fields again.",
+      422
+    );
+    return next(error);
   }
 
   const {
     productTitle,
     productDescription,
     productPrice,
+    productNumInStock,
     productCategory,
     productSizes,
     productColors,
@@ -197,39 +242,79 @@ const updateProduct = (req, res, next) => {
 
   const productId = req.params.pid;
 
-  const updatedProduct = { ...DUMMY_PRODUCTS.find((p) => p.id === productId) };
+  let product;
 
-  const productIndex = DUMMY_PRODUCTS.findIndex((p) => p.id === productId);
-
-  updatedProduct.productTitle = productTitle;
-  updatedProduct.productDescription = productDescription;
-  updatedProduct.productPrice = productPrice;
-  updatedProduct.productCategory = productCategory;
-  updatedProduct.productSizes = productSizes;
-  updatedProduct.productColors = productColors;
-  updatedProduct.genders = genders;
-  updatedProduct.productShipping = productShipping;
-  updatedProduct.productSizeFit = productSizeFit;
-  updatedProduct.productImages = productImages;
-  updatedProduct.productCreator = productCreator;
-
-  DUMMY_PRODUCTS[productIndex] = updatedProduct;
-
-  res
-    .status(200)
-    .json({ product: updatedProduct, message: "Product Successfully Updated" });
-};
-
-/* Delete (REMOVE) Product */
-const deleteProduct = (req, res, next) => {
-  const productId = req.params.pid;
-
-  if(!DUMMY_PRODUCTS.find( p => p.id === productId)) {
-    const error = new HttpError("Could not find a prodcut for that ID.", 404);
+  try {
+    product = await Product.findById(productId);
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, could not update product.",
+      500
+    );
     return next(error);
   }
 
-  DUMMY_PRODUCTS = DUMMY_PRODUCTS.filter((p) => p.id !== productId);
+  product.productTitle = productTitle;
+  product.productDescription = productDescription;
+  product.productPrice = productPrice;
+  product.productNumInStock = productNumInStock;
+  product.productCategory = productCategory;
+  product.productSizes = productSizes;
+  product.productColors = productColors;
+  product.genders = genders;
+  product.productShipping = productShipping;
+  product.productSizeFit = productSizeFit;
+  product.productImages = productImages;
+  product.productCreator = productCreator;
+
+  try {
+    await product.save();
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, could not update the products",
+      500
+    );
+    return next(error);
+  }
+
+  res
+    .status(200)
+    .json({
+      product: product.toObject({ getters: true }),
+      message: "Product Successfully Updated",
+    });
+};
+
+/* Delete (REMOVE) Product */
+const deleteProduct = async (req, res, next) => {
+  const productId = req.params.pid;
+
+  let product;
+
+  try {
+    product = await Product.findById(productId);
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, could not delete the product. try again in few moments",
+      500
+    );
+    return next(error);
+  }
+
+  if (!place) {
+    const error = new HttpError("Could not find a product for this ID", 500);
+    return next(error);
+  }
+
+  try {
+    await product.remove(); // mongoose method remove() is a deleting method
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, could not delete the product. try again in few moments",
+      404
+    );
+    return next(error);
+  }
 
   res.status(200).json({ message: "Product Successfully Deleted" });
 };

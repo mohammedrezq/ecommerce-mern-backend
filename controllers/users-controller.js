@@ -1,6 +1,8 @@
-const HttpError = require("../models/http-error");
 const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
+
+const HttpError = require("../models/http-error");
+const User = require("../models/user");
 
 let DUMMY_USERS = [
   {
@@ -19,18 +21,27 @@ let DUMMY_USERS = [
 
 /* Get List of registered users */
 
-const getUsers = (req, res, next) => {
-  res.json({ users: DUMMY_USERS });
+const getUsers = async (req, res, next) => {
+  let users;
+  try {
+    users = await User.find( {}, "email firstName lastName Country Gender Avatar" );
+  } catch (err) {
+    const error = new HttpError("Fetching users failed, please try again in few moments", 500);
+    return next(error);
+  }
+
+  res.json({ users: users.map(user => user.toObject( { getters: true } )) });
 };
 
 /* Create new user */
 
-const signup = (req, res, next) => {
+const signup = async (req, res, next) => {
 
     const errors = validationResult(req); // Part of express-validator to check valiadtion for inputs
 
     if (!errors.isEmpty()) {
-      throw new HttpError("Invalid inputs passed please check your data again.", 422)
+      const error = new HttpError("Invalid inputs passed please check your data again.", 422);
+      return next(error);
     }
 
   const {
@@ -38,51 +49,65 @@ const signup = (req, res, next) => {
     password,
     fisrtName,
     lastName,
+    bio,
+    cartHistory,
     DateOfBirth,
     Country,
     Gender,
-    Avatar,
+    Avatar
   } = req.body;
 
-  const hasUser = DUMMY_USERS.find((u) => u.email === email);
-
-  if (hasUser) {
-    const error = new HttpError(
-      "Could not create user, Email already exists.",
-      422
-    ); // 402 invalid user input
-
+  let existingUser;
+  try {
+    existingUser = await User.findOne({email: email}); // Check User existing by using email (unique email)
+  } catch(err) {
+    const error = new HttpError("Signing up failed, please try again in few moments", 500);
     return next(error);
   }
 
-  const createdUser = {
-    id: uuidv4(),
+  if(existingUser) {
+    const error = new HttpError("User already exists, please login instead", 422);
+    return next(error);
+  }
+
+  const createdUser = new User( {
     email,
     password,
     fisrtName,
     lastName,
+    bio,
+    cartHistory,
     DateOfBirth,
     Country,
     Gender,
     Avatar,
-  };
+  } )
+  
+  try {
+    await createdUser.save(); // Signup new user using Save() method from mongoose
+  } catch (err) {
+    const error = new HttpError("Signing up user failed, please try again in few moments", 500);
+    return next(error);
+  }
 
-  DUMMY_USERS.unshift(createdUser);
-
-  res.status(201).json({ users: createdUser });
+  res.status(201).json({ users: createdUser.toObject( { getters: true } ) });
 };
 
 /* Login the registered user */
 
-const login = (req, res, next) => {
+const login = async (req, res, next) => {
   const { email, password } = req.body;
 
-  const identifiedUser = DUMMY_USERS.find((u) => u.email === email);
-  if (!identifiedUser || identifiedUser.password !== password) {
-    const error = new HttpError(
-      "Credentials seems to be wrong, could not identify user.",
-      401
-    ); // 401 authentication failed
+  let existingUser;
+  try {
+    existingUser = await User.findOne({email: email}); // Check if user exist using email as validator
+  } catch (err) {
+    const error = new HttpError("Logging in failed, please try again in few moments", 500);
+    return next(error);
+  }
+
+  if ( !existingUser || existingUser.password !== password) { // if email or password is wrong it sends back an error
+    const error = new HttpError("Invalid credentials could not log you in.", 401);
     return next(error);
   }
 
@@ -91,27 +116,34 @@ const login = (req, res, next) => {
 
 /* Get User BY ID (Profile)  */
 
-const getUserById = (req, res, next) => {
+const getUserById = async (req, res, next) => {
   const userId = req.params.uid;
 
-  const user = DUMMY_USERS.find((u) => u.id === userId);
+  let user;
+  try {
+    user = await User.findById(userId);
+  } catch (err) {
+    const error = new HttpError("Could not fetch user for the provided ID", 500);
+    return next(error);
+  }
 
   if (!user) {
     const error = new HttpError("Could not find a user for that ID!.", 404);
     return next(error);
   }
 
-  res.json({ user });
+  res.json({ user: user.toObject( { getters: true } ) });
 };
 
-/* Edit existing user info */
+/* Edit existing user info (UPDATE USER INFO) */
 
-const editUser = (req, res, next) => {
+const editUser = async (req, res, next) => {
 
     const errors = validationResult(req);  // Part of express-validator to check valiadtion for inputs
 
     if(!errors.isEmpty()) {
-        throw new HttpError("Invalid inputs passed please check your data again.", 422 )
+        const error = new HttpError("Invalid inputs passed please check your data again.", 422 );
+        return next(error);
     }
 
   const {
@@ -126,35 +158,61 @@ const editUser = (req, res, next) => {
   } = req.body;
 
   const userId = req.params.uid;
-  // make sure to make a copy of existing info (Spread operator.)
-  const updatedUser = { ...DUMMY_USERS.find((u) => u.id === userId) };
-  const userIndex = DUMMY_USERS.findIndex((u) => u.id === userId);
 
-  updatedUser.email = email;
-  updatedUser.password = password;
-  updatedUser.fisrtName = fisrtName;
-  updatedUser.lastName = lastName;
-  updatedUser.DateOfBirth = DateOfBirth;
-  updatedUser.Country = Country;
-  updatedUser.Gender = Gender;
-  updatedUser.Avatar = Avatar;
+  let user;
+  try {
+    user = await User.findById(userId);
+  } catch (err) {
+    const error = new HttpError("Something went wrong, could not update user.", 500);
+    return next(error);
+  }
 
-  DUMMY_USERS[userIndex] = updatedUser;
+  user.email = email;
+  user.password = password;
+  user.fisrtName = fisrtName;
+  user.lastName = lastName;
+  user.DateOfBirth = DateOfBirth;
+  user.Country = Country;
+  user.Gender = Gender;
+  user.Avatar = Avatar;
 
-  res.status(200).json({ users: updatedUser, message: "User info updated!" });
+  // DUMMY_USERS[userIndex] = updatedUser;
+
+  try {
+    await user.save();
+  } catch (err) {
+    const error = new HttpError("Updating user info failed, please try again in few moments", 500);
+    return next(error);
+  }
+
+  res.status(200).json({ users: user.toObject( {getters: true} ), message: "User info updated!" });
 };
 
 /* delete existing user */
 
-const deleteUser = (req, res, next) => {
+const deleteUser = async (req, res, next) => {
   const userId = req.params.uid;
 
-  if (!DUMMY_USERS.find( u => u.id === userId)) {
-      const error = new HttpError("Could not find a user for that ID.", 404);
-      return next(error);
+  let user;
+
+  try {
+    user = await User.findById(userId);
+  } catch (err) {
+    const error = new HttpError("Something went wrong, please try again in few moments", 500);
+    return next(error);
   }
 
-  DUMMY_USERS = DUMMY_USERS.filter((u) => u.id !== userId);
+  if (!user) {
+    const error = new HttpError("Could not find a user for this ID", 404);
+    return next(error);
+  }
+
+  try {
+    await user.remove(); // Deleting user from user list 
+  } catch (err) {
+    const error = new HttpError("Something went wrong, could not delete the user. please try again in few moments", 500);
+    return next(error);
+  }
 
   res.status(200).json({ message: "User Successfully Deleted." });
 };
