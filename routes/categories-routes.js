@@ -1,5 +1,4 @@
 const express = require("express");
-
 const { check } = require("express-validator");
 
 const categoreisController = require("../controllers/categories-controller");
@@ -11,7 +10,7 @@ const router = express.Router(); // const { Router } = require('express');
 router.post(
   "/",
   check("categoryTitle").not().isEmpty(),
-  check("categoryDescription").not().isEmpty().isLength({ min: 10 }),
+  check("categoryDescription").not().isEmpty().isLength({ min: 5 }),
   categoreisController.createCategory
 );
 
@@ -28,7 +27,7 @@ router.get("/", categoreisController.getAllCategories);
 router.patch(
   "/edit/:cid",
   check("categoryTitle").not().isEmpty(),
-  check("categoryDescription").not().isEmpty().isLength({ min: 10 }),
+  check("categoryDescription").not().isEmpty().isLength({ min: 5 }),
   categoreisController.updateCategory
 );
 

@@ -1,23 +1,7 @@
-const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
 
 const HttpError = require("../models/http-error");
 const User = require("../models/user");
-
-let DUMMY_USERS = [
-  {
-    id: "u1",
-    email: "mohammed@gmail.com",
-    password: 123456,
-    fisrtName: "mohammed",
-    lastName: "rezq",
-    DateOfBirth: "30/12/1992",
-    Country: "USA",
-    Gender: "Male",
-    Avatar:
-      "https://thumbs.dreamstime.com/b/default-avatar-photo-placeholder-profile-icon-eps-file-easy-to-edit-default-avatar-photo-placeholder-profile-icon-124557887.jpg",
-  },
-];
 
 /* Get List of registered users */
 
@@ -27,6 +11,11 @@ const getUsers = async (req, res, next) => {
     users = await User.find( {}, "email firstName lastName Country Gender Avatar" );
   } catch (err) {
     const error = new HttpError("Fetching users failed, please try again in few moments", 500);
+    return next(error);
+  }
+
+  if (!users || users.length === 0 ) {
+    const error = new HttpError("Could not find user ", 404);
     return next(error);
   }
 
