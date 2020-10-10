@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+require("dotenv").config(); // For .env files
 
 const HttpError = require("./models/http-error");
 const productsRoutes = require("./routes/products-routes");
@@ -30,11 +31,15 @@ app.use((error, req, res, next) => {
   res.json({ message: error.message || "An unknown error occured!." });
 });
 
+
+// FROM .env
+const port = process.env.PORT || 5000
+const database = process.env.DATABASE;
 mongoose
   .connect(
-    `mongodb+srv://ecommerce-moh:aUHpNQmBjinjyWEf@cluster0.ta9zh.mongodb.net/products?retryWrites=true&w=majority`
+    database
   )
   .then(() => {
-    app.listen(5000);
+    app.listen(port);
   })
   .catch((error) => console.log("Connection Failed!", error));
