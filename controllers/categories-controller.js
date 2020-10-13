@@ -3,7 +3,6 @@ const { v4: uuidv4 } = require("uuid");
 
 const { validationResult } = require("express-validator");
 const Cat = require("../models/category");
-const product = require("../models/product");
 
 /* Create a category */
 

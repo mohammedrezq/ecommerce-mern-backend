@@ -43,7 +43,6 @@ const signup = async (req, res, next) => {
     DateOfBirth,
     Country,
     Gender,
-    Avatar
   } = req.body;
 
   let existingUser;
@@ -69,7 +68,8 @@ const signup = async (req, res, next) => {
     DateOfBirth,
     Country,
     Gender,
-    Avatar,
+    Avatar: "https://cdn.iconscout.com/icon/free/png-256/avatar-370-456322.png",
+    products: [],
   } )
   
   try {

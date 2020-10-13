@@ -18,7 +18,6 @@ router.post("/signup", [
     check("DateOfBirth").not().isEmpty(),
     check("Country").not().isEmpty(),
     check("Gender").not().isEmpty(),
-    check("Avatar").not().isEmpty(),
 ] , usersController.signup);
 
 /* Login the registered user */
@@ -37,7 +36,6 @@ router.patch("/edit/:uid", [
     check("DateOfBirth").not().isEmpty(),
     check("Country").not().isEmpty(),
     check("Gender").not().isEmpty(),
-    check("Avatar").not().isEmpty(),
 ] , usersController.editUser);
 
 /* delete existing user */

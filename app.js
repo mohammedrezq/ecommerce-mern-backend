@@ -1,20 +1,32 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const colors = require("colors");
 const mongoose = require("mongoose");
 require("dotenv").config(); // For .env files
 
 const HttpError = require("./models/http-error");
+/* Routes */
 const productsRoutes = require("./routes/products-routes");
 const usersRoutes = require("./routes/users-routes");
 const categoriesRoutes = require("./routes/categories-routes");
+const orderRoutes = require("./routes/order-routes");
 
 const app = express();
 
 app.use(bodyParser.json());
 
+// CORS HEADERS
+app.use((req, res, next ) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Header', "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  res.setHeader('Access-Control-Allow-Methods', "GET, POST, PUT, PATCH, DELETE")
+  next();
+})
+
 app.use("/api/products", productsRoutes); // => api/products/...
 app.use("/api/users", usersRoutes); // => api/users/...
-app.use("/api/cats", categoriesRoutes); // => api/categories/...
+app.use("/api/cats", categoriesRoutes); // => api/cats/...
+app.use("/api/orders", orderRoutes); // => api/orders/...
 
 // Undefined Routes
 app.use((req, res, next) => {
@@ -31,15 +43,20 @@ app.use((error, req, res, next) => {
   res.json({ message: error.message || "An unknown error occured!." });
 });
 
-
 // FROM .env
-const port = process.env.PORT || 5000
+const port = process.env.PORT || 5000;
 const database = process.env.DATABASE;
-mongoose
-  .connect(
-    database
-  )
-  .then(() => {
-    app.listen(port);
-  })
-  .catch((error) => console.log("Connection Failed!", error));
+
+try {
+  mongoose
+    .connect(database, {
+      useUnifiedTopology: true,
+      useNewUrlParser: true,
+      useCreateIndex: true,
+    })
+    .then(() => {
+      app.listen(port);
+    })
+} catch (err) {
+  console.log(`Connection failed: ${err}`.red.underline);
+}

@@ -22,17 +22,12 @@ router.get("/user/:uid", productsController.getProductsByUserId);
 router.post(
   "/",
   [
-    check("productTitle").not().isEmpty(),
-    check("productDescription").not().isEmpty().isLength({ min: 10 }),
-    check("productPrice").not().isEmpty(),
-    check("productNumInStock").not().isEmpty(),
-    check("productCategory").not().isEmpty(),
-    check("productSizes").not().isEmpty(),
-    check("productColors").not().isEmpty(),
-    check("genders").not().isEmpty(),
-    check("productShipping").not().isEmpty(),
-    check("productSizeFit").not().isEmpty(),
-    check("productImages").not().isEmpty(),
+    check("Title").not().isEmpty(),
+    check("Description").not().isEmpty().isLength({ min: 10 }),
+    check("Price").not().isEmpty(),
+    check("CountInStock").not().isEmpty(),
+    check("Category").not().isEmpty(),
+    check("Images").not().isEmpty(),
   ],
 
   productsController.createProduct
@@ -43,17 +38,12 @@ router.post(
 router.patch(
   "/:pid",
   [
-    check("productTitle").not().isEmpty(),
-    check("productDescription").not().isEmpty().isLength({ min: 10 }),
-    check("productPrice").not().isEmpty(),
-    check("productNumInStock").not().isEmpty(),
-    check("productCategory").not().isEmpty(),
-    check("productSizes").not().isEmpty(),
-    check("productColors").not().isEmpty(),
-    check("genders").not().isEmpty(),
-    check("productShipping").not().isEmpty(),
-    check("productSizeFit").not().isEmpty(),
-    check("productImages").not().isEmpty(),
+    check("Title").not().isEmpty(),
+    check("Description").not().isEmpty().isLength({ min: 10 }),
+    check("Price").not().isEmpty(),
+    check("CountInStock").not().isEmpty(),
+    check("Category").not().isEmpty(),
+    check("Images").not().isEmpty(),
   ],
   productsController.updateProduct
 );
