@@ -1,6 +1,8 @@
 const { validationResult } = require("express-validator");
+const generateToken = require("../utils/generateToken");
 
 const HttpError = require("../models/http-error");
+const user = require("../models/user");
 const User = require("../models/user");
 
 /* Get List of registered users */
@@ -79,7 +81,22 @@ const signup = async (req, res, next) => {
     return next(error);
   }
 
-  res.status(201).json({ users: createdUser.toObject( { getters: true } ) });
+  if(createdUser)
+  res.status(201).json({ users: {
+    _id:createdUser._id,
+    email:createdUser.email,
+    // password:createdUser.password, // Should not be sent to the frontend!
+    fisrtName:createdUser.fisrtName,
+    lastName:createdUser.lastName,
+    bio:createdUser.bio,
+    cartHistory:createdUser.cartHistory,
+    DateOfBirth:createdUser.DateOfBirth,
+    Country:createdUser.Country,
+    Gender:createdUser.Gender,
+    Avatar:createdUser.Avatar,
+    products: [],
+    token: generateToken(createdUser._id)
+  } });
 };
 
 /* Login the registered user */
@@ -89,18 +106,39 @@ const login = async (req, res, next) => {
 
   let existingUser;
   try {
-    existingUser = await User.findOne({email: email}); // Check if user exist using email as validator
+    existingUser = await User.findOne({email}); // Check if user exist using email as validator
   } catch (err) {
     const error = new HttpError("Logging in failed, please try again in few moments", 500);
     return next(error);
   }
 
-  if ( !existingUser || existingUser.password !== password) { // if email or password is wrong it sends back an error
-    const error = new HttpError("Invalid credentials could not log you in.", 401);
+  // if ( !existingUser || existingUser.password !== password) { // if email or password is wrong it sends back an error
+  //   const error = new HttpError("Invalid credentials could not log you in.", 401);
+  //   return next(error);
+  // }
+  console.log("thePassword", password)
+
+  if(existingUser && (await existingUser.matchPassword(password))) {
+    res.json({
+      _id: existingUser._id,
+      email: existingUser.email,
+      firstName: existingUser.fisrtName,
+      lastName: existingUser.lastName,
+      isAdmin: existingUser.isAdmin,
+      Country: existingUser.Country,
+      Gender: existingUser.Gender,
+      cartHistory: existingUser.cartHistory,
+      DateOfBirth: existingUser.DateOfBirth,
+      bio: existingUser.bio,
+      token: generateToken(existingUser._id)
+    })
+  } else {
+    const error = new HttpError("Invalid Email or Password", 401);
     return next(error);
   }
 
-  res.json({ message: "Logged In!" });
+
+  // res.json({ message: "Logged In!" });
 };
 
 /* Get User BY ID (Profile)  */
@@ -108,6 +146,7 @@ const login = async (req, res, next) => {
 const getUserById = async (req, res, next) => {
   const userId = req.params.uid;
 
+  console.log(userId)
   let user;
   try {
     user = await User.findById(userId);

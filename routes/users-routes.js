@@ -1,6 +1,7 @@
 const express = require("express");
 const { check } = require("express-validator");
 
+const protect = require("../middleware/authMiddleware");
 const usersController = require("../controllers/users-controller");
 
 const router = express.Router();
@@ -24,7 +25,7 @@ router.post("/signup", [
 router.post("/login", usersController.login);
 
 /* Get User BY ID (Profile)  */
-router.get("/profile/:uid", usersController.getUserById);
+router.get("/profile/:uid", protect,usersController.getUserById);
 
 /* Edit existing user info */
 router.patch("/edit/:uid", [
