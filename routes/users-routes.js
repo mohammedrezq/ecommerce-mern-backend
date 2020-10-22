@@ -9,7 +9,7 @@ const router = express.Router();
 /* Get List of registered users */
 router.get("/", usersController.getUsers);
 
-/* Create new user */
+/* Create (Register) new user */
 router.post("/signup", [
     check("email").normalizeEmail() // check if Test@test.com =>  test@test.com
     .isEmail(),
@@ -25,7 +25,7 @@ router.post("/signup", [
 router.post("/login", usersController.login);
 
 /* Get User BY ID (Profile)  */
-router.get("/profile/:uid", protect,usersController.getUserById);
+router.get("/profile", protect,usersController.getUserById);
 
 /* Edit existing user info */
 router.patch("/edit/:uid", [

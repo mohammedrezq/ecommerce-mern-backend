@@ -13,7 +13,7 @@ const userSchema = new Schema({
   products: [{ type: mongoose.Schema.Types.ObjectId, required: true, ref: "Product"}] ,
   bio: { type: String },
   cartHistory: { type: Array, default: [] },
-  DateOfBirth: { type: String, required: true },
+  DateOfBirth: { type: Date, required: true },
   Country: { type: String, required: true },
   Gender: { type: String, required: true },
   Avatar: { type: String },

@@ -24,7 +24,7 @@ const getUsers = async (req, res, next) => {
   res.json({ users: users.map(user => user.toObject( { getters: true } )) });
 };
 
-/* Create new user */
+/* Create (Register) new user */
 
 const signup = async (req, res, next) => {
 
@@ -144,23 +144,29 @@ const login = async (req, res, next) => {
 /* Get User BY ID (Profile)  */
 
 const getUserById = async (req, res, next) => {
-  const userId = req.params.uid;
+  // const userId = req.params.uid;
 
-  console.log(userId)
+  // console.log(userId)
   let user;
   try {
-    user = await User.findById(userId);
+    user = await User.findById(req.user._id); // this will provide the user info for the user based on his id and Jsonwebtoken provided!
+    // console.log(user)
   } catch (err) {
     const error = new HttpError("Could not fetch user for the provided ID", 500);
     return next(error);
   }
 
-  if (!user) {
-    const error = new HttpError("Could not find a user for that ID!.", 404);
+  // if (!user) {
+  //   const error = new HttpError("Could not find a user for that ID!.", 404);
+  //   return next(error);
+  // }
+
+  if(user) {
+    res.json({ user: user.toObject( { getters: true } ) });
+  } else {
+    const error = new HttpError("Could not find a user for that ID!.", 401);
     return next(error);
   }
-
-  res.json({ user: user.toObject( { getters: true } ) });
 };
 
 /* Edit existing user info (UPDATE USER INFO) */
