@@ -38,7 +38,7 @@ const signup = async (req, res, next) => {
   const {
     email,
     password,
-    fisrtName,
+    firstName,
     lastName,
     bio,
     cartHistory,
@@ -63,7 +63,7 @@ const signup = async (req, res, next) => {
   const createdUser = new User( {
     email,
     password,
-    fisrtName,
+    firstName,
     lastName,
     bio,
     cartHistory,
@@ -86,7 +86,7 @@ const signup = async (req, res, next) => {
     _id:createdUser._id,
     email:createdUser.email,
     // password:createdUser.password, // Should not be sent to the frontend!
-    fisrtName:createdUser.fisrtName,
+    firstName:createdUser.firstName,
     lastName:createdUser.lastName,
     bio:createdUser.bio,
     cartHistory:createdUser.cartHistory,
@@ -122,7 +122,7 @@ const login = async (req, res, next) => {
     res.json({
       _id: existingUser._id,
       email: existingUser.email,
-      firstName: existingUser.fisrtName,
+      firstName: existingUser.firstName,
       lastName: existingUser.lastName,
       isAdmin: existingUser.isAdmin,
       Country: existingUser.Country,
@@ -183,7 +183,7 @@ const editUser = async (req, res, next) => {
   const {
     email,
     password,
-    fisrtName,
+    firstName,
     lastName,
     DateOfBirth,
     Country,
@@ -203,7 +203,7 @@ const editUser = async (req, res, next) => {
 
   user.email = email;
   user.password = password;
-  user.fisrtName = fisrtName;
+  user.firstName = firstName;
   user.lastName = lastName;
   user.DateOfBirth = DateOfBirth;
   user.Country = Country;

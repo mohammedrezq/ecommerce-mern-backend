@@ -14,7 +14,7 @@ router.post("/signup", [
     check("email").normalizeEmail() // check if Test@test.com =>  test@test.com
     .isEmail(),
     check("password").isLength( {min: 6} ),
-    check("fisrtName").not().isEmpty(),
+    check("firstName").not().isEmpty(),
     check("lastName").not().isEmpty(),
     check("DateOfBirth").not().isEmpty(),
     check("Country").not().isEmpty(),
@@ -32,7 +32,7 @@ router.patch("/edit/:uid", [
     check("email").normalizeEmail() // check if Test@test.com =>  test@test.com
     .isEmail(),
     check("password").isLength( {min: 6} ),
-    check("fisrtName").not().isEmpty(),
+    check("firstName").not().isEmpty(),
     check("lastName").not().isEmpty(),
     check("DateOfBirth").not().isEmpty(),
     check("Country").not().isEmpty(),
