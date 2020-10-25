@@ -21,9 +21,13 @@ const protect = async( req, res, next ) => {
             next()
         } catch (err) {
             console.error(err);
-            const error = new HttpError("Not authorized, token failed.", 401);
+            const error = new HttpError("Not authorized 1 , token failed.", 401);
             return next(error);
         }
+    } else {
+        console.error(err);
+        const error = new HttpError("Not authorized 2", 401);
+        return next(error);
     }
 
     // console.log(token)

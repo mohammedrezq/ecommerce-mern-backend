@@ -27,17 +27,20 @@ router.post("/login", usersController.login);
 /* Get User BY ID (Profile)  */
 router.get("/profile", protect,usersController.getUserById);
 
-/* Edit existing user info */
-router.patch("/edit/:uid", [
+/* Update existing user info */
+router.put("/profile", 
+[
     check("email").normalizeEmail() // check if Test@test.com =>  test@test.com
-    .isEmail(),
-    check("password").isLength( {min: 6} ),
-    check("firstName").not().isEmpty(),
-    check("lastName").not().isEmpty(),
-    check("DateOfBirth").not().isEmpty(),
-    check("Country").not().isEmpty(),
-    check("Gender").not().isEmpty(),
-] , usersController.editUser);
+    .isEmail().optional(),
+    check("password").isLength( {min: 6} ).optional(),
+    check("firstName").optional(),
+    check("lastName").optional(),
+    check("DateOfBirth").optional(),
+    check("Country").optional(),
+    check("Gender").optional(),
+    check("bio").optional({checkFalsy: true}), // Soruce: https://express-validator.github.io/docs/validation-chain-api.html#optionaloptions 
+] ,
+protect , usersController.editUser);
 
 /* delete existing user */
 router.delete("/:uid", usersController.deleteUser);

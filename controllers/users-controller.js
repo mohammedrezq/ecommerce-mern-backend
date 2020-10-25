@@ -4,36 +4,45 @@ const generateToken = require("../utils/generateToken");
 const HttpError = require("../models/http-error");
 const user = require("../models/user");
 const User = require("../models/user");
+// const asyncHandler = require("express-async-handler");
 
 /* Get List of registered users */
 
 const getUsers = async (req, res, next) => {
   let users;
   try {
-    users = await User.find( {}, "email firstName lastName Country Gender Avatar" );
+    users = await User.find(
+      {},
+      "email firstName lastName Country Gender Avatar"
+    );
   } catch (err) {
-    const error = new HttpError("Fetching users failed, please try again in few moments", 500);
+    const error = new HttpError(
+      "Fetching users failed, please try again in few moments",
+      500
+    );
     return next(error);
   }
 
-  if (!users || users.length === 0 ) {
+  if (!users || users.length === 0) {
     const error = new HttpError("Could not find user ", 404);
     return next(error);
   }
 
-  res.json({ users: users.map(user => user.toObject( { getters: true } )) });
+  res.json({ users: users.map((user) => user.toObject({ getters: true })) });
 };
 
 /* Create (Register) new user */
 
 const signup = async (req, res, next) => {
+  const errors = validationResult(req); // Part of express-validator to check valiadtion for inputs
 
-    const errors = validationResult(req); // Part of express-validator to check valiadtion for inputs
-
-    if (!errors.isEmpty()) {
-      const error = new HttpError("Invalid inputs passed please check your data again.", 422);
-      return next(error);
-    }
+  if (!errors.isEmpty()) {
+    const error = new HttpError(
+      "Invalid inputs passed please check your data again.",
+      422
+    );
+    return next(error);
+  }
 
   const {
     email,
@@ -49,18 +58,24 @@ const signup = async (req, res, next) => {
 
   let existingUser;
   try {
-    existingUser = await User.findOne({email: email}); // Check User existing by using email (unique email)
-  } catch(err) {
-    const error = new HttpError("Signing up failed, please try again in few moments", 500);
+    existingUser = await User.findOne({ email: email }); // Check User existing by using email (unique email)
+  } catch (err) {
+    const error = new HttpError(
+      "Signing up failed, please try again in few moments",
+      500
+    );
     return next(error);
   }
 
-  if(existingUser) {
-    const error = new HttpError("User already exists, please login instead", 422);
+  if (existingUser) {
+    const error = new HttpError(
+      "User already exists, please login instead",
+      422
+    );
     return next(error);
   }
 
-  const createdUser = new User( {
+  const createdUser = new User({
     email,
     password,
     firstName,
@@ -72,31 +87,36 @@ const signup = async (req, res, next) => {
     Gender,
     Avatar: "https://cdn.iconscout.com/icon/free/png-256/avatar-370-456322.png",
     products: [],
-  } )
-  
+  });
+
   try {
     await createdUser.save(); // Signup new user using Save() method from mongoose
   } catch (err) {
-    const error = new HttpError("Signing up user failed, please try again in few moments", 500);
+    const error = new HttpError(
+      "Signing up user failed, please try again in few moments",
+      500
+    );
     return next(error);
   }
 
-  if(createdUser)
-  res.status(201).json({ users: {
-    _id:createdUser._id,
-    email:createdUser.email,
-    // password:createdUser.password, // Should not be sent to the frontend!
-    firstName:createdUser.firstName,
-    lastName:createdUser.lastName,
-    bio:createdUser.bio,
-    cartHistory:createdUser.cartHistory,
-    DateOfBirth:createdUser.DateOfBirth,
-    Country:createdUser.Country,
-    Gender:createdUser.Gender,
-    Avatar:createdUser.Avatar,
-    products: [],
-    token: generateToken(createdUser._id)
-  } });
+  if (createdUser)
+    res.status(201).json({
+      users: {
+        _id: createdUser._id,
+        email: createdUser.email,
+        // password:createdUser.password, // Should not be sent to the frontend!
+        firstName: createdUser.firstName,
+        lastName: createdUser.lastName,
+        bio: createdUser.bio,
+        cartHistory: createdUser.cartHistory,
+        DateOfBirth: createdUser.DateOfBirth,
+        Country: createdUser.Country,
+        Gender: createdUser.Gender,
+        Avatar: createdUser.Avatar,
+        products: [],
+        token: generateToken(createdUser._id),
+      },
+    });
 };
 
 /* Login the registered user */
@@ -106,9 +126,12 @@ const login = async (req, res, next) => {
 
   let existingUser;
   try {
-    existingUser = await User.findOne({email}); // Check if user exist using email as validator
+    existingUser = await User.findOne({ email }); // Check if user exist using email as validator
   } catch (err) {
-    const error = new HttpError("Logging in failed, please try again in few moments", 500);
+    const error = new HttpError(
+      "Logging in failed, please try again in few moments",
+      500
+    );
     return next(error);
   }
 
@@ -116,9 +139,9 @@ const login = async (req, res, next) => {
   //   const error = new HttpError("Invalid credentials could not log you in.", 401);
   //   return next(error);
   // }
-  console.log("thePassword", password)
+  console.log("thePassword", password);
 
-  if(existingUser && (await existingUser.matchPassword(password))) {
+  if (existingUser && (await existingUser.matchPassword(password))) {
     res.json({
       _id: existingUser._id,
       email: existingUser.email,
@@ -130,13 +153,12 @@ const login = async (req, res, next) => {
       cartHistory: existingUser.cartHistory,
       DateOfBirth: existingUser.DateOfBirth,
       bio: existingUser.bio,
-      token: generateToken(existingUser._id)
-    })
+      token: generateToken(existingUser._id),
+    });
   } else {
     const error = new HttpError("Invalid Email or Password", 401);
     return next(error);
   }
-
 
   // res.json({ message: "Logged In!" });
 };
@@ -152,7 +174,10 @@ const getUserById = async (req, res, next) => {
     user = await User.findById(req.user._id); // this will provide the user info for the user based on his id and Jsonwebtoken provided!
     // console.log(user)
   } catch (err) {
-    const error = new HttpError("Could not fetch user for the provided ID", 500);
+    const error = new HttpError(
+      "Could not fetch user for the provided ID",
+      500
+    );
     return next(error);
   }
 
@@ -161,65 +186,160 @@ const getUserById = async (req, res, next) => {
   //   return next(error);
   // }
 
-  if(user) {
-    res.json({ user: user.toObject( { getters: true } ) });
+  if (user) {
+    res.json({ user: user.toObject({ getters: true }) });
   } else {
     const error = new HttpError("Could not find a user for that ID!.", 401);
     return next(error);
   }
 };
 
+/* Update User BY ID (Profile)  */
+
+// const updateUserById = async (req, res, next) => {
+//   // const userId = req.params.uid;
+
+//   // console.log(userId)
+//   let user;
+//   try {
+//     user = await User.findById(req.user._id); // this will provide the user info for the user based on his id and Jsonwebtoken provided!
+//     // console.log(user)
+//   } catch (err) {
+//     const error = new HttpError(
+//       "Could not fetch user for the provided ID",
+//       500
+//     );
+//     return next(error);
+//   }
+
+//   // if (!user) {
+//   //   const error = new HttpError("Could not find a user for that ID!.", 404);
+//   //   return next(error);
+//   // }
+
+//   if (user) {
+//     res.json({ user: user.toObject({ getters: true }) });
+//   } else {
+//     const error = new HttpError("Could not find a user for that ID!.", 401);
+//     return next(error);
+//   }
+// };
+
 /* Edit existing user info (UPDATE USER INFO) */
 
 const editUser = async (req, res, next) => {
+//   const errors = validationResult(req); // Part of express-validator to check valiadtion for inputs
 
-    const errors = validationResult(req);  // Part of express-validator to check valiadtion for inputs
+//   if (!errors.isEmpty()) {
+//     const error = new HttpError(
+//       "Invalid inputs, please check your data again.",
+//       422
+//     );
+//     return next(error);
+//   }
 
-    if(!errors.isEmpty()) {
-        const error = new HttpError("Invalid inputs passed please check your data again.", 422 );
-        return next(error);
+
+  // let user;
+  // console.log(req.user);
+  // try {
+    let user = await User.findById(req.user._id);
+  //   console.log("THIS IS USER", user);
+  // } catch (err) {
+  //   const error = new HttpError(
+  //     "Something went wrong, could not update user.",
+  //     500
+  //   );
+  //   return next(error);
+  // }
+
+  if(user) {
+    user.bio = req.body.bio || user.bio;
+    user.email = req.body.email || user.email;
+    if(req.body.password) {
+      user.password = req.body.password 
+    }
+    user.firstName = req.body.firstName || user.firstName;
+    user.lastName = req.body.lastName || user.lastName;
+    user.DateOfBirth = req.body.DateOfBirth || user.DateOfBirth;
+    user.Country = req.body.Country || user.Country;
+    user.Gender = req.body.Gender || user.Gender;
+    // user.Avatar = req.body.Avatar || user.Avatar;
+
+    const updatedUser = await user.save();
+
+    res.json({
+        email: updatedUser.email,
+        password: updatedUser.password,
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        isAdmin: updatedUser.isAdmin,
+        Country: updatedUser.Country,
+        Gender: updatedUser.Gender,
+        DateOfBirth: updatedUser.DateOfBirth,
+        bio: updatedUser.bio,
+        _id: updatedUser._id,
+        token: generateToken(updatedUser._id),
+    });
+
+    } else {
+      const error = new HttpError(
+        "Updating user info failed, please try again in few moments",
+        404
+      );
+      return next(error);
     }
 
-  const {
-    email,
-    password,
-    firstName,
-    lastName,
-    DateOfBirth,
-    Country,
-    Gender,
-    Avatar,
-  } = req.body;
+  // const {
+  //   bio,
+  //   email,
+  //   password,
+  //   firstName,
+  //   lastName,
+    // DateOfBirth,
+    // Country,
+    // Gender,
+  //   Avatar,
+  // } = req.body;
 
-  const userId = req.params.uid;
+  // const userId = req.params.uid;
 
-  let user;
-  try {
-    user = await User.findById(userId);
-  } catch (err) {
-    const error = new HttpError("Something went wrong, could not update user.", 500);
-    return next(error);
-  }
 
-  user.email = email;
-  user.password = password;
-  user.firstName = firstName;
-  user.lastName = lastName;
-  user.DateOfBirth = DateOfBirth;
-  user.Country = Country;
-  user.Gender = Gender;
-  user.Avatar = Avatar;
+  // user.bio = bio;
+  // user.email = email;
+  // user.password = password;
+  // user.firstName = firstName;
+  // user.lastName = lastName;
+  // user.DateOfBirth = DateOfBirth;
+  // user.Country = Country;
+  // user.Gender = Gender;
+  // user.Avatar = Avatar;
 
-  // DUMMY_USERS[userIndex] = updatedUser;
+  // let updatedUser;
+  // updatedUser = await user.save();
 
-  try {
-    await user.save();
-  } catch (err) {
-    const error = new HttpError("Updating user info failed, please try again in few moments", 500);
-    return next(error);
-  }
-
-  res.status(200).json({ users: user.toObject( {getters: true} ), message: "User info updated!" });
+  // if (updatedUser) {
+  //   res.status(200).json({
+  //     users: {
+  //       email: updatedUser.email,
+  //       password: updatedUser.password,
+  //       firstName: updatedUser.firstName,
+  //       lastName: updatedUser.lastName,
+  //       isAdmin: updatedUser.isAdmin,
+  //       Country: updatedUser.Country,
+  //       Gender: updatedUser.Gender,
+  //       // DateOfBirth: updatedUser.DateOfBirth,
+  //       bio: updatedUser.bio,
+  //       _id: updatedUser._id,
+  //       token: generateToken(updatedUser._id),
+  //     },
+  //   });
+  // } else {
+  //   const error = new HttpError(
+  //     "Updating user info failed, please try again in few moments",
+  //     500
+  //   );
+  //   return next(error);
+  // }
 };
 
 /* delete existing user */
@@ -232,7 +352,10 @@ const deleteUser = async (req, res, next) => {
   try {
     user = await User.findById(userId);
   } catch (err) {
-    const error = new HttpError("Something went wrong, please try again in few moments", 500);
+    const error = new HttpError(
+      "Something went wrong, please try again in few moments",
+      500
+    );
     return next(error);
   }
 
@@ -242,9 +365,12 @@ const deleteUser = async (req, res, next) => {
   }
 
   try {
-    await user.remove(); // Deleting user from user list 
+    await user.remove(); // Deleting user from user list
   } catch (err) {
-    const error = new HttpError("Something went wrong, could not delete the user. please try again in few moments", 500);
+    const error = new HttpError(
+      "Something went wrong, could not delete the user. please try again in few moments",
+      500
+    );
     return next(error);
   }
 
