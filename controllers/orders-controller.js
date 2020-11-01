@@ -98,13 +98,20 @@ const makeAnOrder = async (req, res, next) => {
     return next(error);
   }
 
-  const {  orderItems, ShippingAddress, paymentMethod, paymentResult, taxPrice, shippingPrice  } = req.body;
+  const {  orderItems, ShippingAddress, paymentMethod, itemsPrice, taxPrice, shippingPrice, totalPrice  } = req.body;
   console.log(req.body);
   // const orderItems = req.body.orderItems;
+  
+  if (makeOrder && orderItems.length === 0) {
+    res.status(400);
+    const error = new HttpError("No order items", 400)
+    return next(error)
+  }
 
   const makeOrder = new Order({
-     orderItems, ShippingAddress, paymentMethod, paymentResult, taxPrice, shippingPrice
+     orderItems, user: req.user._id, ShippingAddress, paymentMethod, itemsPrice, taxPrice, shippingPrice, totalPrice
   });
+
 
   let order;
   try {
@@ -119,7 +126,7 @@ const makeAnOrder = async (req, res, next) => {
     return next(error);
   }
 
-  res.status(201).json({ order: order });
+  res.status(201).json(order);
 };
 
 /* Update AN Order */
