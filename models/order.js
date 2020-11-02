@@ -3,21 +3,25 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const orderSchema = new Schema ({
-    // User: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "User" },
+    user: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "User"},
     orderItems: [{
-        name: {type: String, required: true},
+        title: {type: String, required: true},
         qty: {type: Number, required: true},
         image: {type: String, required: true},
         size: {type: String, required: true},
         price: {type: Number, required: true},
-        // product: {type: mongoose.Schema.Types.ObjectId, required: true, ref: "Product"},
+        product: {type: mongoose.Schema.Types.ObjectId, required: true, ref: "Product"},
     }
     ],
-    ShippingAddress:{
-        address: { type: String, required: true },
-        city: { type: String, required: true },
-        postalCode: { type: String, required: true },
-        country: { type: String, required: true },
+    shippingAddress:{
+        firstName: {type: String, required: true},
+        lastName: {type: String, required: true},
+        Address: { type: String, required: true },
+        City: { type: String, required: true },
+        PostalCode: { type: String, required: true },
+        Country: { type: String, required: true },
+        Email: { type: String, required: true },
+        PhoneNumber: { type: String, required: true },
     },
     paymentMethod: { type: String, required: true},
     paymentResult: {  // From Paypal
@@ -26,9 +30,10 @@ const orderSchema = new Schema ({
         update_time: { type: String},
         email_address: { type: String},
     } ,
-    taxPrice: { type: Number, required: true, default: 0.0 },
-    shippingPrice: { type: Number, required: true, default: 0.0 },
-    totalPrice: { type: Number, required: true, default: 0.0 },
+    itemsPrice: { type: String, required: true, default: "0.00" },
+    taxPrice: { type: String, required: true, default: "0.00" },
+    shippingPrice: { type: String, required: true, default: "0.00" },
+    totalPrice: { type: String, required: true, default: "0.00" },
     isPaid: { type: Boolean, required: true, default: false },
     paidAt: { type: Date },
     isDelivered: { type: Boolean, required: true, default: false },

@@ -5,7 +5,7 @@ const HttpError = require("../models/http-error");
 const Product = require("../models/product");
 const User = require("../models/user");
 const Order = require("../models/order");
-
+const generateToken = require("../utils/generateToken");
 
 /* Get Order (Link) by order Id */
 
@@ -23,7 +23,7 @@ const getOrderById = async (req, res, next) => {
     );
     return next(error);
   }
-  console.log(order)
+  console.log(order);
 
   if (!order || order.length === 0) {
     const error = new HttpError("Could not find a order for that ID.", 404);
@@ -88,66 +88,86 @@ const getOrdersByUserId = async (req, res, next) => {
 
 /* Make an Order */
 const makeAnOrder = async (req, res, next) => {
-  const errors = validationResult(req); // Part of express-validator to check valiadtion for inputs
+  // const errors = validationResult(req); // Part of express-validator to check valiadtion for inputs
 
-  if (!errors.isEmpty()) {
-    const error = new HttpError(
-      "Invalid inputs passed please check the data again.",
-      422
-    );
-    return next(error);
-  }
+  // if (!errors.isEmpty()) {
+  //   const error = new HttpError(
+  //     "Invalid inputs passed please check the data again.",
+  //     422
+  //   );
+  //   return next(error);
+  // }
 
-  const {  orderItems, ShippingAddress, paymentMethod, itemsPrice, taxPrice, shippingPrice, totalPrice  } = req.body;
+  const {
+    orderItems,
+    shippingAddress,
+    paymentMethod,
+    itemsPrice,
+    taxPrice,
+    shippingPrice,
+    totalPrice,
+  } = req.body;
   console.log(req.body);
   // const orderItems = req.body.orderItems;
-  
-  if (makeOrder && orderItems.length === 0) {
+
+  if (orderItems && orderItems.length === 0) {
     res.status(400);
-    const error = new HttpError("No order items", 400)
-    return next(error)
-  }
-
-  const makeOrder = new Order({
-     orderItems, user: req.user._id, ShippingAddress, paymentMethod, itemsPrice, taxPrice, shippingPrice, totalPrice
-  });
-
-
-  let order;
-  try {
-    
-    order = await makeOrder.save(); // save the order made
- 
-  } catch (err) {
-    const error = new HttpError(
-      "Creating order failed, please try again",
-      500
-    );
+    const error = new HttpError("No order items", 400);
     return next(error);
+  } else {
+    const order = new Order({
+      orderItems,
+      user: req.user._id,
+      shippingAddress,
+      paymentMethod,
+      itemsPrice,
+      taxPrice,
+      shippingPrice,
+      totalPrice,
+    });
+
+    const createdOrder = await order.save(); // save the order made
+    res.status(201).json(createdOrder);
+
+
   }
 
-  res.status(201).json(order);
+  // let order;
+  // try {
+  //   order = await createdOrder.save(); // save the order made
+  // } catch (err) {
+  //   const error = new HttpError("Creating order failed, please try again", 500);
+  //   return next(error);
+  // }
+
+  // res.status(201).json(order);
 };
 
 /* Update AN Order */
 const updateAnOrder = async (req, res, next) => {
-  
   const errors = validationResult(req); // Part of express-validator to check valiadtion for inputs
   if (!errors.isEmpty()) {
     const error = new HttpError(
       "Update Failed due to invalid inputs please check the data in the input fields again.",
       422
-      );
-      return next(error);
-    }
-    
-    const {  orderItems, ShippingAddress, paymentMethod, paymentResult, taxPrice, shippingPrice  } = req.body;
-    
-    const orderId = req.params.oid;
+    );
+    return next(error);
+  }
 
-    console.log(orderId)
+  const {
+    orderItems,
+    shippingAddress,
+    paymentMethod,
+    paymentResult,
+    taxPrice,
+    shippingPrice,
+  } = req.body;
 
-    let order;
+  const orderId = req.params.oid;
+
+  console.log(orderId);
+
+  let order;
 
   try {
     order = await Order.findById(orderId);
@@ -160,7 +180,7 @@ const updateAnOrder = async (req, res, next) => {
   }
 
   order.orderItems = orderItems;
-  order.ShippingAddress = ShippingAddress;
+  order.shippingAddress = shippingAddress;
   order.paymentMethod = paymentMethod;
   order.paymentResult = paymentResult;
   order.taxPrice = taxPrice;
@@ -203,11 +223,9 @@ const deleteAnOrder = async (req, res, next) => {
     return next(error);
   }
 
-  // Removing Order 
+  // Removing Order
   try {
-
     await order.remove(); // remove order
-
   } catch (err) {
     const error = new HttpError(
       "Something went wrong, could not delete the order. try again in few moments",

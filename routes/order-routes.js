@@ -22,15 +22,15 @@ router.get("/user/:uid", ordersController.getOrdersByUserId);
 
 router.post(
   "/",
-  [
-    check("orderItems").not().isEmpty(),
-    check("ShippingAddress").not().isEmpty(),
-    check("paymentMethod").not().isEmpty(),
-    check("paymentResult").not().isEmpty(),
-    check("taxPrice").not().isEmpty(),
-    check("shippingPrice").not().isEmpty(),
-    check("totalPrice").not().isEmpty(),
-  ],
+  // [
+    // check("orderItems").not().isEmpty(),
+    // check("ShippingAddress").not().isEmpty(),
+    // check("paymentMethod").not().isEmpty(),
+    // check("paymentResult").not().isEmpty(),
+    // check("taxPrice").not().isEmpty(),
+    // check("shippingPrice").not().isEmpty(),
+    // check("totalPrice").not().isEmpty(),
+  // ],
   protect,
   ordersController.makeAnOrder
 );
