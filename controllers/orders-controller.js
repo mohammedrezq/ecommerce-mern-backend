@@ -15,7 +15,7 @@ const getOrderById = async (req, res, next) => {
   console.log(orderId);
   let order;
   try {
-    order = await Order.findById(orderId);
+    order = await Order.findById(orderId).populate('user', 'firstName lastName email'); // populate user info from USER Model
   } catch (err) {
     const error = new HttpError(
       "Could not find any orders for the provided ID",
@@ -30,7 +30,7 @@ const getOrderById = async (req, res, next) => {
     return next(error);
   }
 
-  res.json({ order: order.toObject({ getters: true }) }); // => {order} => {order: order}
+  res.json( order.toObject({ getters: true }) ); // => {order} => {order: order}
 };
 
 /* Get List of all Orders */
@@ -237,9 +237,51 @@ const deleteAnOrder = async (req, res, next) => {
   res.status(200).json({ message: "Order Successfully Deleted" });
 };
 
+/* Update an Order to Paid (make paid true instead of false) */
+
+const updateOrderToPaid = async (req, res, next) => {
+  // const oid = req.params.oid;
+  // console.log(oid)
+  let order;
+  try {
+    order = await Order.findById(req.params.id);
+  } catch(err) {
+    const error = new HttpError("Order Issue", 500);
+    return next(error);
+  }
+
+  // console.log(order)
+
+  
+  // console.log(req.body);
+  if(order) {
+    order.isPaid = true;
+    order.paidAt = Date.now();
+    order.paymentResult = {
+      // from paypal
+      id: req.body.id,
+      status: req.body.status,
+      update_time: req.body.update_time,
+      email_address: req.body.payer.email_address
+    }
+    
+    // console.log(order.paymentResult);
+    const updatedOrder = await order.save();
+      // console.log(updatedOrder);
+      res.json(updatedOrder);
+
+  } else {
+    const error = new HttpError("Order Not Found", 404)
+    return next(error);
+  }
+
+}
+
+
 exports.getOrderById = getOrderById;
 exports.getAllOrders = getAllOrders;
 exports.getOrdersByUserId = getOrdersByUserId;
 exports.makeAnOrder = makeAnOrder;
 exports.updateAnOrder = updateAnOrder;
 exports.deleteAnOrder = deleteAnOrder;
+exports.updateOrderToPaid = updateOrderToPaid;

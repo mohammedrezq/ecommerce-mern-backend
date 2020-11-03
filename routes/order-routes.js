@@ -14,22 +14,22 @@ router.get("/:oid", ordersController.getOrderById);
 
 router.get("/", ordersController.getAllOrders);
 
-/* Get Product (Link) by user Id (productCreator id) */
+/* Get Orders (Link) by user Id (Orders by User id) */
 
-router.get("/user/:uid", ordersController.getOrdersByUserId);
+router.get("/orders/:uid", ordersController.getOrdersByUserId);
 
 /* Create New Product */
 
 router.post(
   "/",
   // [
-    // check("orderItems").not().isEmpty(),
-    // check("ShippingAddress").not().isEmpty(),
-    // check("paymentMethod").not().isEmpty(),
-    // check("paymentResult").not().isEmpty(),
-    // check("taxPrice").not().isEmpty(),
-    // check("shippingPrice").not().isEmpty(),
-    // check("totalPrice").not().isEmpty(),
+  // check("orderItems").not().isEmpty(),
+  // check("ShippingAddress").not().isEmpty(),
+  // check("paymentMethod").not().isEmpty(),
+  // check("paymentResult").not().isEmpty(),
+  // check("taxPrice").not().isEmpty(),
+  // check("shippingPrice").not().isEmpty(),
+  // check("totalPrice").not().isEmpty(),
   // ],
   protect,
   ordersController.makeAnOrder
@@ -51,8 +51,12 @@ router.patch(
   ordersController.updateAnOrder
 );
 
+/* Update an Order to Paid (make paid true instead of false) */
+router.put("/:id/pay", protect, ordersController.updateOrderToPaid);
+
 /* Delete (REMOVE) Product */
 
 router.delete("/:oid", ordersController.deleteAnOrder);
+
 
 module.exports = router;

@@ -32,6 +32,9 @@ app.use("/api/users", usersRoutes); // => api/users/...
 app.use("/api/cats", categoriesRoutes); // => api/cats/...
 app.use("/api/orders", orderRoutes); // => api/orders/...
 
+app.get('/api/config/paypal', (req, res) => res.send(process.env.PAYPAL_CLIENT_ID))
+console.log(process.env.PAYPAL_CLIENT_ID);
+
 // Undefined Routes
 app.use((req, res, next) => {
   const error = new HttpError("Could not find this route.", 404);
