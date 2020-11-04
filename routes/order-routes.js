@@ -6,6 +6,10 @@ const protect = require("../middleware/authMiddleware");
 
 const router = express.Router(); // const { Router } = require('express');
 
+/* Get Orders made by user  (Orders by User) */
+
+router.get("/myorders", protect ,ordersController.getOrdersByUser); // has to be before /:oid so it wouldn't treated as an ID
+
 /* Get Product (Link) by product Id */
 
 router.get("/:oid", ordersController.getOrderById);
@@ -16,7 +20,9 @@ router.get("/", ordersController.getAllOrders);
 
 /* Get Orders (Link) by user Id (Orders by User id) */
 
-router.get("/orders/:uid", ordersController.getOrdersByUserId);
+// router.get("/orders/:uid", ordersController.getOrdersByUserId);
+
+
 
 /* Create New Product */
 

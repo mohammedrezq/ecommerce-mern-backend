@@ -12,10 +12,13 @@ const generateToken = require("../utils/generateToken");
 const getOrderById = async (req, res, next) => {
   const orderId = req.params.oid; // { oid: "5f82c63fa4c72a60646563dc" } example
 
-  console.log(orderId);
+  // console.log(orderId);
   let order;
   try {
-    order = await Order.findById(orderId).populate('user', 'firstName lastName email'); // populate user info from USER Model
+    order = await Order.findById(orderId).populate(
+      "user",
+      "firstName lastName email"
+    ); // populate user info from USER Model
   } catch (err) {
     const error = new HttpError(
       "Could not find any orders for the provided ID",
@@ -23,14 +26,14 @@ const getOrderById = async (req, res, next) => {
     );
     return next(error);
   }
-  console.log(order);
+  // console.log(order);
 
   if (!order || order.length === 0) {
     const error = new HttpError("Could not find a order for that ID.", 404);
     return next(error);
   }
 
-  res.json( order.toObject({ getters: true }) ); // => {order} => {order: order}
+  res.json(order.toObject({ getters: true })); // => {order} => {order: order}
 };
 
 /* Get List of all Orders */
@@ -59,45 +62,35 @@ const getAllOrders = async (req, res, next) => {
 
 /* Get Order (Link) by user Id (userID) */
 
-const getOrdersByUserId = async (req, res, next) => {
-  const userId = req.params.uid;
+// const getOrdersByUserId = async (req, res, next) => {
+//   const userId = req.params.uid;
 
-  let orders;
-  try {
-    orders = await Order.find({ User: userId });
-  } catch (err) {
-    const error = new HttpError(
-      "Fetching orders failed for the provided user ID, please try again in few moments.",
-      500
-    );
-    return next(error);
-  }
+//   let orders;
+//   try {
+//     orders = await Order.find({ User: userId });
+//   } catch (err) {
+//     const error = new HttpError(
+//       "Fetching orders failed for the provided user ID, please try again in few moments.",
+//       500
+//     );
+//     return next(error);
+//   }
 
-  if (!orders || orders.length === 0) {
-    const error = new HttpError(
-      "Could not find any orders for the provided user ID.",
-      404
-    );
-    return next(error);
-  }
+//   if (!orders || orders.length === 0) {
+//     const error = new HttpError(
+//       "Could not find any orders for the provided user ID.",
+//       404
+//     );
+//     return next(error);
+//   }
 
-  res.json({
-    orders: orders.map((order) => order.toObject({ getters: true })),
-  }); // => {user} => {user: user}
-};
+//   res.json({
+//     orders: orders.map((order) => order.toObject({ getters: true })),
+//   }); // => {user} => {user: user}
+// };
 
 /* Make an Order */
 const makeAnOrder = async (req, res, next) => {
-  // const errors = validationResult(req); // Part of express-validator to check valiadtion for inputs
-
-  // if (!errors.isEmpty()) {
-  //   const error = new HttpError(
-  //     "Invalid inputs passed please check the data again.",
-  //     422
-  //   );
-  //   return next(error);
-  // }
-
   const {
     orderItems,
     shippingAddress,
@@ -107,8 +100,6 @@ const makeAnOrder = async (req, res, next) => {
     shippingPrice,
     totalPrice,
   } = req.body;
-  console.log(req.body);
-  // const orderItems = req.body.orderItems;
 
   if (orderItems && orderItems.length === 0) {
     res.status(400);
@@ -128,8 +119,6 @@ const makeAnOrder = async (req, res, next) => {
 
     const createdOrder = await order.save(); // save the order made
     res.status(201).json(createdOrder);
-
-
   }
 
   // let order;
@@ -240,21 +229,15 @@ const deleteAnOrder = async (req, res, next) => {
 /* Update an Order to Paid (make paid true instead of false) */
 
 const updateOrderToPaid = async (req, res, next) => {
-  // const oid = req.params.oid;
-  // console.log(oid)
   let order;
   try {
     order = await Order.findById(req.params.id);
-  } catch(err) {
+  } catch (err) {
     const error = new HttpError("Order Issue", 500);
     return next(error);
   }
 
-  // console.log(order)
-
-  
-  // console.log(req.body);
-  if(order) {
+  if (order) {
     order.isPaid = true;
     order.paidAt = Date.now();
     order.paymentResult = {
@@ -262,25 +245,52 @@ const updateOrderToPaid = async (req, res, next) => {
       id: req.body.id,
       status: req.body.status,
       update_time: req.body.update_time,
-      email_address: req.body.payer.email_address
-    }
-    
+      email_address: req.body.payer.email_address,
+    };
+
     // console.log(order.paymentResult);
     const updatedOrder = await order.save();
-      // console.log(updatedOrder);
-      res.json(updatedOrder);
-
+    // console.log(updatedOrder);
+    res.json(updatedOrder);
   } else {
-    const error = new HttpError("Order Not Found", 404)
+    const error = new HttpError("Order Not Found", 404);
+    return next(error);
+  }
+};
+
+
+/* Get Order (Link) by user Id (userID) Logged in User */
+
+const getOrdersByUser = async (req, res, next) => {
+  const userId = req.user._id;
+
+  let orders;
+  try {
+    orders = await Order.find({ user: userId });
+  } catch (err) {
+    const error = new HttpError(
+      "Fetching orders failed, please try again in few moments.",
+      500
+    );
     return next(error);
   }
 
-}
+  // if (!orders || orders.length === 0) {
+  //   const error = new HttpError(
+  //     "Could not find any orders user.",
+  //     404
+  //   );
+  //   return next(error);
+  // }
 
+  res.json(
+    orders = orders.map((order) => order.toObject({ getters: true })),
+  ); // => {user} => {user: user}
+};
 
 exports.getOrderById = getOrderById;
 exports.getAllOrders = getAllOrders;
-exports.getOrdersByUserId = getOrdersByUserId;
+exports.getOrdersByUser = getOrdersByUser;
 exports.makeAnOrder = makeAnOrder;
 exports.updateAnOrder = updateAnOrder;
 exports.deleteAnOrder = deleteAnOrder;
