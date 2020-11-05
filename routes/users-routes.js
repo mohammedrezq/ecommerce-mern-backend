@@ -1,13 +1,13 @@
 const express = require("express");
 const { check } = require("express-validator");
 
-const protect = require("../middleware/authMiddleware");
+const { protect, adminstrator } = require("../middleware/authMiddleware");
 const usersController = require("../controllers/users-controller");
 
 const router = express.Router();
 
-/* Get List of registered users */
-router.get("/", usersController.getUsers);
+/* Get List of All registered users for Admin */
+router.get("/", protect ,adminstrator, usersController.getAllUsers);
 
 /* Create (Register) new user */
 router.post("/signup", [
@@ -24,7 +24,7 @@ router.post("/signup", [
 /* Login the registered user */
 router.post("/login", usersController.login);
 
-/* Get User BY ID (Profile)  */
+/* Get User BY ID (Profile) (BY USER)  */
 router.get("/profile", protect,usersController.getUserById);
 
 /* Update existing user info */
@@ -43,6 +43,12 @@ router.put("/profile",
 protect , usersController.editUser);
 
 /* delete existing user */
-router.delete("/:uid", usersController.deleteUser);
+router.delete("/:uid", protect, adminstrator, usersController.deleteUser);
+
+/* Get User BY ID (Profile) (BY ADMIN)  */
+router.get("/:uid", protect, adminstrator, usersController.getUserByIdAdmin);
+
+/* Edit User BY ID (Profile) (BY ADMIN)  */
+router.put("/:uid", protect, adminstrator, usersController.editUserAdmin);
 
 module.exports = router;

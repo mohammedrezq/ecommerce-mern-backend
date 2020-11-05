@@ -8,7 +8,7 @@ const userSchema = new Schema(
   {
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true, minlength: 6 },
-    isAdmin: { type: Boolean, required: true, default: false },
+    isAdmin: { type: Boolean, required: false, default: false }, // Setting if user isAdmin or Not is not required 
     firstName: { type: String, required: true, maxlength: 80 },
     lastName: { type: String, required: true, maxlength: 80 },
     products: [

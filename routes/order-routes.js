@@ -2,7 +2,7 @@ const express = require("express");
 const { check } = require("express-validator");
 
 const ordersController = require("../controllers/orders-controller");
-const protect = require("../middleware/authMiddleware");
+const {protect} = require("../middleware/authMiddleware");
 
 const router = express.Router(); // const { Router } = require('express');
 
