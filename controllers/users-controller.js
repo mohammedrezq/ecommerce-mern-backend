@@ -139,7 +139,7 @@ const login = async (req, res, next) => {
   //   const error = new HttpError("Invalid credentials could not log you in.", 401);
   //   return next(error);
   // }
-  console.log("thePassword", password);
+  // console.log("thePassword", password);
 
   if (existingUser && (await existingUser.matchPassword(password))) {
     res.json({
@@ -389,6 +389,7 @@ if(user) {
   const updatedUser = await user.save();
 
   res.json({
+    users: {
       email: updatedUser.email,
       password: updatedUser.password,
       firstName: updatedUser.firstName,
@@ -400,6 +401,7 @@ if(user) {
       isAdmin: updatedUser.isAdmin,
       bio: updatedUser.bio,
       _id: updatedUser._id,
+    }
   });
 
   } else {
