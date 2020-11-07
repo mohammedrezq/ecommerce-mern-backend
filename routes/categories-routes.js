@@ -1,6 +1,8 @@
 const express = require("express");
 const { check } = require("express-validator");
 
+const { protect, adminstrator } = require('../middleware/authMiddleware');
+
 const categoreisController = require("../controllers/categories-controller");
 
 const router = express.Router(); // const { Router } = require('express');
@@ -10,24 +12,33 @@ const router = express.Router(); // const { Router } = require('express');
 router.post(
   "/",
   check("categoryTitle").not().isEmpty(),
-  check("categoryDescription").not().isEmpty().isLength({ min: 5 }),
+  check("categoryDescription").not().isEmpty().isLength({ min: 3 }), protect, adminstrator,
   categoreisController.createCategory
 );
 
-/* Get Category By ID */
+/* Get Category By ID (For Admin) */
 
-router.get("/:cid", categoreisController.getCategoryById);
+router.get("/:cid", protect, adminstrator, categoreisController.getCategoryById);
 
-/* Get All Categories */
+/* Get All Categories (For Admin) */
 
-router.get("/", categoreisController.getAllCategories);
+router.get("/", protect, adminstrator, categoreisController.getAllCategories);
+
+/* Get Category By ID ( For Users ) */
+
+router.get("/:cid", categoreisController.getCategoryByIdUsers);
+
+/* Get All Categories (For Users) */
+
+router.get("/", categoreisController.getAllCategoriesUsers);
 
 /* Update Existing Category */
 
-router.patch(
-  "/edit/:cid",
-  check("categoryTitle").not().isEmpty(),
-  check("categoryDescription").not().isEmpty().isLength({ min: 5 }),
+router.put(
+  "/:cid",
+  // check("categoryTitle").not().isEmpty(),
+  // check("categoryDescription").not().isEmpty().isLength({ min: 3 }),
+  protect, adminstrator,
   categoreisController.updateCategory
 );
 

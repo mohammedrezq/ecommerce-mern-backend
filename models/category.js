@@ -4,7 +4,8 @@ const Schema = mongoose.Schema;
 
 const categorySchema = new Schema({
     categoryTitle: { type: String, required: true },
-    categoryDescription: { type: String, required: true, minlength: 5, maxlength: 600 },
+    categoryDescription: { type: String, required: true, minlength: 3, maxlength: 600 },
+    categoryImage: { type: String },
     products: [{ type: mongoose.Schema.Types.ObjectId, required: true, ref: "Product"}] ,
 }, { timestamps: true });
 

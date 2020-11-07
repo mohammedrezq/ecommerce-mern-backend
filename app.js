@@ -11,6 +11,7 @@ const HttpError = require("./models/http-error");
 const productsRoutes = require("./routes/products-routes");
 const usersRoutes = require("./routes/users-routes");
 const categoriesRoutes = require("./routes/categories-routes");
+const categoriesUsersRoutes = require("./routes/categories-users-routes");
 const orderRoutes = require("./routes/order-routes");
 
 const app = express();
@@ -29,7 +30,8 @@ app.use((req, res, next ) => {
 
 app.use("/api/products", productsRoutes); // => api/products/...
 app.use("/api/users", usersRoutes); // => api/users/...
-app.use("/api/cats", categoriesRoutes); // => api/cats/...
+app.use("/api/cats", categoriesRoutes); // => api/cats/... (For Admin)
+app.use("/api/categories", categoriesUsersRoutes); // => api/categories/... (For Users)
 app.use("/api/orders", orderRoutes); // => api/orders/...
 
 app.get('/api/config/paypal', (req, res) => res.send(process.env.PAYPAL_CLIENT_ID))
