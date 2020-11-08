@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
 const colors = require("colors");
@@ -13,6 +14,7 @@ const usersRoutes = require("./routes/users-routes");
 const categoriesRoutes = require("./routes/categories-routes");
 const categoriesUsersRoutes = require("./routes/categories-users-routes");
 const orderRoutes = require("./routes/order-routes");
+const uploadRoutes = require("./routes/upload-routes");
 
 const app = express();
 
@@ -33,9 +35,13 @@ app.use("/api/users", usersRoutes); // => api/users/...
 app.use("/api/cats", categoriesRoutes); // => api/cats/... (For Admin)
 app.use("/api/categories", categoriesUsersRoutes); // => api/categories/... (For Users)
 app.use("/api/orders", orderRoutes); // => api/orders/...
+app.use("/api/uploads", uploadRoutes); // => api/orders/...
 
 app.get('/api/config/paypal', (req, res) => res.send(process.env.PAYPAL_CLIENT_ID))
 console.log(process.env.PAYPAL_CLIENT_ID);
+
+// const __dirname = path.reslove()
+app.use("./uploads", express.static(path.join(path.resolve(), "./uploads")))
 
 // Undefined Routes
 app.use((req, res, next) => {

@@ -185,7 +185,7 @@ const createProduct = async (req, res, next) => {
     return next(error);
   }
 
-  res.status(201).json({ product: createdProduct });
+  res.status(201).json( createdProduct );
 };
 
 /* Update Product */
@@ -258,15 +258,64 @@ const updateProduct = async (req, res, next) => {
 };
 
 /* Delete (REMOVE) Product */
+// const deleteProduct = async (req, res, next) => {
+//   const productId = req.params.pid;
+
+//   let product;
+//   let product2;
+
+//   try {
+//     product = await Product.findById(productId).populate("Category");
+//     product2 = await Product.findById(productId).populate("UserId");
+//   } catch (err) {
+//     const error = new HttpError(
+//       "Something went wrong, could not delete the product. try again in few moments",
+//       500
+//     );
+//     return next(error);
+//   }
+//   // console.log(product.productCategory.products); // product IDs in Category products Array
+
+//   if (!product && !product2 ) {
+//     const error = new HttpError("Could not find a product for this ID", 500);
+//     return next(error);
+//   }
+
+//   // Removing Product and its ID from Category, Products IDs Array and Save Category
+//   try {
+//     const sess = await mongoose.startSession(); // start a session from mongooose
+//     sess.startTransaction(); // start a transaction from mongoose
+//     await product.remove({ session: sess }); // save created product
+//     await product2.remove({ session: sess }); // save created product
+//     product.Category.products.pull(product); // save category category ID (unique for the cat) from the product Category.products array removed
+//     product2.UserId.products.pull(product2); // save user User ID (unique for the cat) from the product UserId.products array removed
+//     await product.Category.save({ session: sess }); // add products Array to the category
+//     await product2.UserId.save({ session: sess }); // add products Array to the user
+//     await sess.commitTransaction(); // Commit the session from mongoose
+
+//     // await product.remove(); // mongoose method remove() is a deleting method
+//   } catch (err) {
+//     const error = new HttpError(
+//       "Something went wrong, could not delete the product. try again in few moments",
+//       404
+//     );
+//     return next(error);
+//   }
+
+//   res.status(200).json({ message: "Product Successfully Deleted" });
+// };
+
+
+/* Delete (REMOVE) Product */
 const deleteProduct = async (req, res, next) => {
   const productId = req.params.pid;
 
   let product;
-  let product2;
+  // let product2;
 
   try {
-    product = await Product.findById(productId).populate("Category");
-    product2 = await Product.findById(productId).populate("UserId");
+    product = await Product.findById(productId);
+    // product2 = await Product.findById(productId).populate("UserId");
   } catch (err) {
     const error = new HttpError(
       "Something went wrong, could not delete the product. try again in few moments",
@@ -276,22 +325,24 @@ const deleteProduct = async (req, res, next) => {
   }
   // console.log(product.productCategory.products); // product IDs in Category products Array
 
-  if (!product && !product2 ) {
+  if (!product) {
     const error = new HttpError("Could not find a product for this ID", 500);
     return next(error);
   }
 
   // Removing Product and its ID from Category, Products IDs Array and Save Category
   try {
-    const sess = await mongoose.startSession(); // start a session from mongooose
-    sess.startTransaction(); // start a transaction from mongoose
-    await product.remove({ session: sess }); // save created product
-    await product2.remove({ session: sess }); // save created product
-    product.Category.products.pull(product); // save category category ID (unique for the cat) from the product Category.products array removed
-    product2.UserId.products.pull(product2); // save user User ID (unique for the cat) from the product UserId.products array removed
-    await product.Category.save({ session: sess }); // add products Array to the category
-    await product2.UserId.save({ session: sess }); // add products Array to the user
-    await sess.commitTransaction(); // Commit the session from mongoose
+
+    await product.remove();
+    // const sess = await mongoose.startSession(); // start a session from mongooose
+    // sess.startTransaction(); // start a transaction from mongoose
+    // await product.remove({ session: sess }); // save created product
+    // await product2.remove({ session: sess }); // save created product
+    // product.Category.products.pull(product); // save category category ID (unique for the cat) from the product Category.products array removed
+    // product2.UserId.products.pull(product2); // save user User ID (unique for the cat) from the product UserId.products array removed
+    // await product.Category.save({ session: sess }); // add products Array to the category
+    // await product2.UserId.save({ session: sess }); // add products Array to the user
+    // await sess.commitTransaction(); // Commit the session from mongoose
 
     // await product.remove(); // mongoose method remove() is a deleting method
   } catch (err) {

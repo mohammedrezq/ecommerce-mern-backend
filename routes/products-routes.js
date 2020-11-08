@@ -2,6 +2,7 @@ const express = require("express");
 const { check } = require("express-validator");
 
 const productsController = require("../controllers/products-controller");
+const { protect, adminstrator } = require('../middleware/authMiddleware');
 
 const router = express.Router(); // const { Router } = require('express');
 
@@ -50,6 +51,6 @@ router.patch(
 
 /* Delete (REMOVE) Product */
 
-router.delete("/:pid", productsController.deleteProduct);
+router.delete("/:pid", protect, adminstrator, productsController.deleteProduct);
 
 module.exports = router;
