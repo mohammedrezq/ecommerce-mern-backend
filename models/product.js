@@ -11,7 +11,7 @@ const reviewSchema = new Schema({
 })
 
 const productSchema = new Schema ({
-    UserId: { type: mongoose.Schema.Types.ObjectId , required: true, ref: "User" },
+    // UserId: { type: mongoose.Schema.Types.ObjectId , required: true, ref: "User" },
     Title: { type: String, required: true },
     Description: { type: String, required: true},
     Price: { type: Number, required: true, default: 0 },

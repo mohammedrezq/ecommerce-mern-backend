@@ -3,6 +3,7 @@ const { check } = require("express-validator");
 
 const productsController = require("../controllers/products-controller");
 const { protect, adminstrator } = require('../middleware/authMiddleware');
+const fileUpload = require('../middleware/fileuploadMiddleware');
 
 const router = express.Router(); // const { Router } = require('express');
 
@@ -22,6 +23,8 @@ router.get("/user/:uid", productsController.getProductsByUserId);
 
 router.post(
   "/",
+  // fileUpload.array("Images")
+  // ,
   [
     check("Title").not().isEmpty(),
     check("Description").not().isEmpty().isLength({ min: 10 }),

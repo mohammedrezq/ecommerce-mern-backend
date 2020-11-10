@@ -108,7 +108,7 @@ const createProduct = async (req, res, next) => {
     Shipping,
     SizeFit,
     Images,
-    UserId,
+    // UserId,
   } = req.body;
 
   // const producTitle = req.body.productTitle;
@@ -125,7 +125,7 @@ const createProduct = async (req, res, next) => {
     Shipping,
     SizeFit,
     Images,
-    UserId,
+    // UserId,
   });
 
   // Check if category exist, to add products to it
@@ -145,24 +145,24 @@ const createProduct = async (req, res, next) => {
     return next(error);
   }
 
-  // console.log(category);
+  console.log(category);
 
   // Check if User exist, to add products to it
-  let user;
-  try {
-    user = await User.findById(UserId);
-  } catch (err) {
-    const error = new HttpError(
-      "Creating product failed, please try again.",
-      500
-    );
-    return next(error);
-  }
+  // let user;
+  // try {
+  //   user = await User.findById(UserId);
+  // } catch (err) {
+  //   const error = new HttpError(
+  //     "Creating product failed, please try again.",
+  //     500
+  //   );
+  //   return next(error);
+  // }
 
-  if (!user) {
-    const error = new HttpError("Could not find User for provided ID", 404);
-    return next(error);
-  }
+  // if (!user) {
+  //   const error = new HttpError("Could not find User for provided ID", 404);
+  //   return next(error);
+  // }
 
   // console.log(user);
 
@@ -171,9 +171,9 @@ const createProduct = async (req, res, next) => {
     sess.startTransaction(); // start a transaction from mongoose
     await createdProduct.save({ session: sess }); // save created product
     category.products.push(createdProduct); // add category ID (unique for the cat) to the product created
-    user.products.push(createdProduct); // add userID (unique for the cat) to the product created
+    // user.products.push(createdProduct); // add userID (unique for the cat) to the product created
     await category.save({ session: sess }); // add products Array to the category
-    await user.save({ session: sess }); // add products Array to the user
+    // await user.save({ session: sess }); // add products Array to the user
     await sess.commitTransaction(); // Commit the session from mongoose
 
     // await createdProduct.save(); // Create New Product using save() method from mongoose
@@ -211,7 +211,7 @@ const updateProduct = async (req, res, next) => {
     Shipping,
     SizeFit,
     Images,
-    UserId,
+    // UserId,
   } = req.body;
 
   const productId = req.params.pid;
@@ -239,7 +239,7 @@ const updateProduct = async (req, res, next) => {
   product.Shipping = Shipping;
   product.SizeFit = SizeFit;
   product.Images = Images;
-  product.UserId = UserId;
+  // product.UserId = UserId;
 
   try {
     await product.save();

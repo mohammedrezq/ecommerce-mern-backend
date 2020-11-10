@@ -38,10 +38,11 @@ app.use("/api/orders", orderRoutes); // => api/orders/...
 app.use("/api/uploads", uploadRoutes); // => api/orders/...
 
 app.get('/api/config/paypal', (req, res) => res.send(process.env.PAYPAL_CLIENT_ID))
-console.log(process.env.PAYPAL_CLIENT_ID);
+// console.log(process.env.PAYPAL_CLIENT_ID);
 
 // const __dirname = path.reslove()
-app.use("./uploads", express.static(path.join(path.resolve(), "./uploads")))
+console.log("DIRNAME",__dirname)
+app.use("/uploads", express.static(path.join(__dirname, "/uploads")))
 
 // Undefined Routes
 app.use((req, res, next) => {
