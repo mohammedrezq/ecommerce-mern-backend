@@ -30,18 +30,18 @@ app.use((req, res, next ) => {
   next();
 })
 
+app.use("/api/orders", orderRoutes); // => api/orders/...
 app.use("/api/products", productsRoutes); // => api/products/...
 app.use("/api/users", usersRoutes); // => api/users/...
 app.use("/api/cats", categoriesRoutes); // => api/cats/... (For Admin)
 app.use("/api/categories", categoriesUsersRoutes); // => api/categories/... (For Users)
-app.use("/api/orders", orderRoutes); // => api/orders/...
-app.use("/api/uploads", uploadRoutes); // => api/orders/...
+app.use("/api/uploads", uploadRoutes); // => api/uploads/...
 
 app.get('/api/config/paypal', (req, res) => res.send(process.env.PAYPAL_CLIENT_ID))
 // console.log(process.env.PAYPAL_CLIENT_ID);
 
 // const __dirname = path.reslove()
-console.log("DIRNAME",__dirname)
+// console.log("DIRNAME",__dirname)
 app.use("/uploads", express.static(path.join(__dirname, "/uploads")))
 
 // Undefined Routes

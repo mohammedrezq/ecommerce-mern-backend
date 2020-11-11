@@ -38,7 +38,7 @@ function checkFileType (file, cb) {
 const upload = multer({
     storage,
     limits: {
-        fileSize: 3000000,
+        fileSize: 12000000,
     },
     fileFilter: (req, file, cb) => {
        checkFileType(file, cb)
@@ -46,8 +46,9 @@ const upload = multer({
 });
 
 router.post('/', upload.single('Images'), (req, res, next) => {
-    const file = req.file.path // Single Image
-    console.log(file)
+    // const file = req.file.path // Single Image
+    // console.log(file)
+
     // console.log("THE FILES",files)
     // if(!files) {
     //     const error = new Error("Please choose image");
@@ -60,7 +61,10 @@ router.post('/', upload.single('Images'), (req, res, next) => {
     // console.log("THE PATHS",paths)
     // console.log(paths)
 
-    res.send(`/${req.file.path}`)
+    const file = req.file;
+    file.path = file.path.replace(/\\/g, "/"); // make sure image link is OK slashed from: https://stackoverflow.com/questions/59393275/multer-req-files-path-not-editable
+
+    res.send(`/${file.path}`)
 })
 
 

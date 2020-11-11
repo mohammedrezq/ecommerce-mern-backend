@@ -145,7 +145,7 @@ const createProduct = async (req, res, next) => {
     return next(error);
   }
 
-  console.log(category);
+  // console.log(category);
 
   // Check if User exist, to add products to it
   // let user;

@@ -117,8 +117,13 @@ const makeAnOrder = async (req, res, next) => {
       totalPrice,
     });
 
-    const createdOrder = await order.save(); // save the order made
-    res.status(201).json(createdOrder);
+    try {
+      const createdOrder = await order.save(); // save the order made
+      res.status(201).json(createdOrder);
+    } catch(err) {
+      const error = new HttpError("Could not make this order, please try again", 404);
+      return next(error);
+    }
   }
 
   // let order;
