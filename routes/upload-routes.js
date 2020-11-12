@@ -77,17 +77,23 @@ const theupload = multer({
     fileFilter: (req, file, cb) => {
         checkFileType(file, cb)
     }
-}).single("file");
+}).array("file");
 
 // Add protect and adminstrator (Korean)
-router.post('/uploadImage' ,(req, res, next) => {
+router.post('/uploadImage', protect, adminstrator ,(req, res, next) => {
 
     theupload(req, res, err => {
         if(err) return res.json({success:false, err})
-        const imagePath = res.req.file.path.replace(/\\/g, "/"); // make sure image link is OK slashed from: https://stackoverflow.com/questions/59393275/multer-req-files-path-not-editable
-        return res.json({success: true, image: `http://localhost:5000/${imagePath}`, fileName: res.req.file.filename })
+        res.req.files.map(imageFile => { // In case someone tried to add more than one image at a time
+            let imagePath;
+            imagePath = imageFile.path.replace(/\\/g, "/");
+            // console.log(imageFile.filename)
+            // console.log(imagePath)
+            return res.json({success: true, image: `http://localhost:5000/${imagePath}`, fileName: imageFile.filename })
+        })
+        // const imagePath = res.req.file.path.replace(/\\/g, "/"); // make sure image link is OK slashed from: https://stackoverflow.com/questions/59393275/multer-req-files-path-not-editable
     })
-
+//  next()
 })
 
 module.exports = router;
