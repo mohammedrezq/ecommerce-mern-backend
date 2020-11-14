@@ -23,11 +23,11 @@ router.get("/user/:uid", productsController.getProductsByUserId);
 
 router.post(
   "/",
-  // fileUpload.array("Images")
-  // ,
+  protect,
+  adminstrator,
   [
     check("Title").not().isEmpty(),
-    check("Description").not().isEmpty().isLength({ min: 10 }),
+    check("Description").not().isEmpty(),
     check("Price").not().isEmpty(),
     check("CountInStock").not().isEmpty(),
     check("Category").not().isEmpty(),
@@ -39,11 +39,11 @@ router.post(
 
 /* Update Product */
 
-router.patch(
-  "/:pid",
+router.put(
+  "/:pid", protect, adminstrator,
   [
     check("Title").not().isEmpty(),
-    check("Description").not().isEmpty().isLength({ min: 10 }),
+    check("Description").not().isEmpty(),
     check("Price").not().isEmpty(),
     check("CountInStock").not().isEmpty(),
     check("Category").not().isEmpty(),

@@ -199,6 +199,11 @@ const updateProduct = async (req, res, next) => {
     return next(error);
   }
 
+  
+  const productId = req.params.pid;
+
+  console.log(productId)
+
   const {
     Title,
     Description,
@@ -214,7 +219,6 @@ const updateProduct = async (req, res, next) => {
     // UserId,
   } = req.body;
 
-  const productId = req.params.pid;
 
   let product;
 
@@ -228,34 +232,49 @@ const updateProduct = async (req, res, next) => {
     return next(error);
   }
 
-  product.Title = Title;
-  product.Description = Description;
-  product.Price = Price;
-  product.CountInStock = CountInStock;
-  product.Category = Category;
-  product.Sizes = Sizes;
-  product.Colors = Colors;
-  product.Genders = Genders;
-  product.Shipping = Shipping;
-  product.SizeFit = SizeFit;
-  product.Images = Images;
-  // product.UserId = UserId;
+  if(product) {
 
-  try {
-    await product.save();
-  } catch (err) {
+    product.Title = Title || product.Title;
+    product.Description = Description || product.Description;
+    product.Price = Price || product.Price;
+    product.CountInStock = CountInStock || product.CountInStock;
+    product.Category = Category || product.Category;
+    product.Sizes = Sizes || product.Sizes;
+    product.Colors = Colors || product.Colors;
+    product.Genders = Genders || product.Genders;
+    product.Shipping = Shipping || product.Shipping;
+    product.SizeFit = SizeFit || product.SizeFit;
+    product.Images = Images || product.Images;
+    // product.UserId = UserId;
+    
+    const updatedProduct = await product.save();
+    res.status(200).json( {product: updatedProduct} );
+  } else {
     const error = new HttpError(
-      "Something went wrong, could not update the products",
-      500
+      "Updating Product info failed, please try again in few moments",
+      404
     );
     return next(error);
   }
+  // try {
+  // } catch (err) {
+  //   const error = new HttpError(
+  //     "Something went wrong, could not update the products",
+  //     500
+  //   );
+  //   return next(error);
+  // }
 
-  res.status(200).json({
-    product: product,
-    message: "Product Successfully Updated",
-  });
 };
+
+
+
+
+
+
+
+
+
 
 /* Delete (REMOVE) Product */
 // const deleteProduct = async (req, res, next) => {
