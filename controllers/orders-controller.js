@@ -41,7 +41,7 @@ const getOrderById = async (req, res, next) => {
 const getAllOrders = async (req, res, next) => {
   let orders;
   try {
-    orders = await Order.find();
+    orders = await Order.find({}).populate("User", "id");
   } catch (err) {
     const error = new HttpError(
       "Could not fetch any orders, please try again in few moments",
@@ -55,9 +55,7 @@ const getAllOrders = async (req, res, next) => {
     return next(error);
   }
 
-  res.json({
-    orders: orders.map((order) => order.toObject({ getters: true })),
-  });
+  res.json( orders.map((order) => order.toObject({ getters: true })) );
 };
 
 /* Get Order (Link) by user Id (userID) */
@@ -263,6 +261,30 @@ const updateOrderToPaid = async (req, res, next) => {
   }
 };
 
+/* Update an Order to Delivered (make paid true instead of false) */
+
+const updateOrderToDelivered = async (req, res, next) => {
+  let order;
+  try {
+    order = await Order.findById(req.params.id);
+  } catch (err) {
+    const error = new HttpError("Order Issue", 500);
+    return next(error);
+  }
+
+  if (order) {
+    order.isDelivered = true;
+    order.deliveredAt = Date.now();
+
+    const updatedOrder = await order.save();
+
+    res.json(updatedOrder);
+  } else {
+    const error = new HttpError("Order Not Found", 404);
+    return next(error);
+  }
+};
+
 
 /* Get Order (Link) by user Id (userID) Logged in User */
 
@@ -300,3 +322,4 @@ exports.makeAnOrder = makeAnOrder;
 exports.updateAnOrder = updateAnOrder;
 exports.deleteAnOrder = deleteAnOrder;
 exports.updateOrderToPaid = updateOrderToPaid;
+exports.updateOrderToDelivered = updateOrderToDelivered;

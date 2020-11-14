@@ -2,7 +2,7 @@ const express = require("express");
 const { check } = require("express-validator");
 
 const ordersController = require("../controllers/orders-controller");
-const {protect} = require("../middleware/authMiddleware");
+const {protect, adminstrator} = require("../middleware/authMiddleware");
 
 const router = express.Router(); // const { Router } = require('express');
 
@@ -16,7 +16,7 @@ router.get("/:oid", ordersController.getOrderById);
 
 /* Get List of all products */
 
-router.get("/", ordersController.getAllOrders);
+router.get("/", protect, adminstrator, ordersController.getAllOrders);
 
 /* Get Orders (Link) by user Id (Orders by User id) */
 
@@ -59,6 +59,9 @@ router.patch(
 
 /* Update an Order to Paid (make paid true instead of false) */
 router.put("/:id/pay", protect, ordersController.updateOrderToPaid);
+
+/* Update an Order to Delivered (make Dlivered true instead of false) */
+router.put("/:id/deliver", protect, adminstrator, ordersController.updateOrderToDelivered);
 
 /* Delete (REMOVE) Product */
 
