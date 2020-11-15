@@ -3,7 +3,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const colors = require("colors");
 const mongoose = require("mongoose");
-var morgan = require('morgan')
+const morgan = require('morgan')
 
 require("dotenv").config(); // For .env files
 
@@ -18,9 +18,11 @@ const uploadRoutes = require("./routes/upload-routes");
 
 const app = express();
 
+
 app.use(bodyParser.json());
 
-// app.use(morgan())
+
+app.use(morgan('dev'))
 
 // CORS HEADERS
 app.use((req, res, next ) => {

@@ -3,15 +3,18 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const reviewSchema = new Schema({
-    name: { type: String, required: true },
+    title: { type:String },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
     rating: { type: Number, required: true },
     comment: { type: String, required: true },
+    user: { type: mongoose.Schema.Types.ObjectId , required: true, ref: "User" }
 }, {
     timestamps: true
 })
 
 const productSchema = new Schema ({
-    // UserId: { type: mongoose.Schema.Types.ObjectId , required: true, ref: "User" },
+    User: { type: mongoose.Schema.Types.ObjectId , ref: "User" },
     Title: { type: String, required: true },
     Description: { type: String, required: true},
     Price: { type: Number, required: true, default: 0 },

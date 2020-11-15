@@ -52,6 +52,10 @@ router.put(
   productsController.updateProduct
 );
 
+/* Create Product Review */
+
+router.post("/:pid/reviews", protect, productsController.createProductReview);
+
 /* Delete (REMOVE) Product */
 
 router.delete("/:pid", protect, adminstrator, productsController.deleteProduct);

@@ -271,6 +271,71 @@ const updateProduct = async (req, res, next) => {
 
 
 
+/* Create New Review for a Product */
+const createProductReview = async (req, res, next) => {
+  
+  const {
+    title,
+    rating,
+    comment,
+  } = req.body;
+
+  const productId = req.params.pid;
+
+  console.log(productId)
+
+
+  console.log(req.user)
+  
+  let product;
+  
+  // try {
+    product = await Product.findById(productId);
+    // } catch (err) {
+      //   const error = new HttpError(
+        //     "Something went wrong, could not update product.",
+        //     500
+        //   );
+        //   return next(error);
+        // }
+        
+        
+  if(product) {
+    const alreadyReviewed  = product.Reviews.find(r => r.user.toString() === req.user._id.toString())
+    // console.log(product.Reviews)
+    if(alreadyReviewed) {
+      const error = new HttpError("Product was already reviewed", "400")
+      return next(error);
+    }
+
+    // console.log(product)
+
+    const review = {
+      title,
+      firstName: req.user.firstName,
+      lastName: req.user.lastName,
+      rating: Number(rating),
+      comment,
+      user: req.user._id
+    }
+
+    product.Reviews.push(review);
+
+    product.NumReviews = product.Reviews.length;
+
+    product.Rating = product.Reviews.reduce((acc, item) => item.rating + acc, 0 ) /product.Reviews.length;
+
+    await product.save()
+    res.status(201).json({message: "Review successfully added!"})
+
+  } else {
+    const error = new HttpError(
+      "Review adding failed, please try again in few moments",
+      404
+    );
+    return next(error);
+  }
+};
 
 
 
@@ -380,4 +445,5 @@ exports.getAllProducts = getAllProducts;
 exports.getProductsByUserId = getProductsByUserId;
 exports.createProduct = createProduct;
 exports.updateProduct = updateProduct;
+exports.createProductReview = createProductReview;
 exports.deleteProduct = deleteProduct;
