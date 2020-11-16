@@ -34,9 +34,16 @@ const getProductById = async (req, res, next) => {
 /* Get List of all products */
 
 const getAllProducts = async (req, res, next) => {
+  const keyword = req.query.keyword ? {
+    Title: {
+      $regex: req.query.keyword,
+      $options: 'i'
+    }
+  } : {}
+
   let products;
   try {
-    products = await Product.find();
+    products = await Product.find({ ...keyword });
   } catch (err) {
     const error = new HttpError(
       "Could not fetch any products, please try again in few moments",
