@@ -5,6 +5,7 @@ const HttpError = require("../models/http-error");
 const Product = require("../models/product");
 const Cat = require("../models/category");
 const User = require("../models/user");
+const { countDocuments } = require("../models/product");
 
 
 /* Get Product (Link) by product Id */
@@ -34,6 +35,8 @@ const getProductById = async (req, res, next) => {
 /* Get List of all products */
 
 const getAllProducts = async (req, res, next) => {
+  const pageSize = 60;
+  const page = Number(req.query.pageNumber) || 1;
   const keyword = req.query.keyword ? {
     Title: {
       $regex: req.query.keyword,
@@ -42,8 +45,10 @@ const getAllProducts = async (req, res, next) => {
   } : {}
 
   let products;
+  let count;
   try {
-    products = await Product.find({ ...keyword });
+    count = await Product.countDocuments({...keyword})
+    products = await Product.find({ ...keyword }).sort({ createdAt: -1 }).limit(pageSize).skip(pageSize * (page - 1)); // sort -1 descending || 1 ascending
   } catch (err) {
     const error = new HttpError(
       "Could not fetch any products, please try again in few moments",
@@ -58,7 +63,7 @@ const getAllProducts = async (req, res, next) => {
   }
 
   res.json({
-    products: products.map((product) => product.toObject({ getters: true })),
+    products: products.map((product) => product.toObject({ getters: true })), page, pages: Math.ceil(count /pageSize) 
   });
 };
 
