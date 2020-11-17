@@ -3,9 +3,21 @@ const { check } = require("express-validator");
 
 const productsController = require("../controllers/products-controller");
 const { protect, adminstrator } = require('../middleware/authMiddleware');
-const fileUpload = require('../middleware/fileuploadMiddleware');
 
 const router = express.Router(); // const { Router } = require('express');
+
+/* Get List of all products by High Prices */
+
+router.get("/HighestPrice", productsController.getAllProductsHighPrice);
+
+/* Get List of all products by Low Prices */
+
+router.get("/LowestPrice", productsController.getAllProductsLowPrice);
+
+/* Get List of all products by Low Prices */
+
+router.get("/TopRated", productsController.getTopProductsRating);
+
 
 /* Get Product (Link) by product Id */
 

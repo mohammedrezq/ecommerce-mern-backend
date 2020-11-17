@@ -67,6 +67,88 @@ const getAllProducts = async (req, res, next) => {
   });
 };
 
+/* Get List of all products Sorted By High Price */
+
+const getAllProductsHighPrice = async (req, res, next) => {
+  const pageSize = 60;
+  const page = Number(req.query.pageNumber) || 1;
+
+  let products;
+  let count;
+  try {
+    count = await Product.countDocuments({})
+    products = await Product.find({}).sort({ Price: -1 }).limit(pageSize).skip(pageSize * (page - 1)); // sort -1 descending || 1 ascending
+  } catch (err) {
+    const error = new HttpError(
+      "Could not fetch any products, please try again in few moments",
+      404
+    );
+    return next(error);
+  }
+
+  if (products.length === 0) {
+    const error = new HttpError("Could not fetch any products.", 422);
+    return next(error);
+  }
+
+  res.json({
+    products: products.map((product) => product.toObject({ getters: true })), page, pages: Math.ceil(count /pageSize) 
+  });
+};
+
+/* Get List of all products Sorted By Low Price */
+
+const getAllProductsLowPrice = async (req, res, next) => {
+  const pageSize = 60;
+  const page = Number(req.query.pageNumber) || 1;
+
+  let products;
+  let count;
+  try {
+    count = await Product.countDocuments({})
+    products = await Product.find({}).sort({ Price: 1 }).limit(pageSize).skip(pageSize * (page - 1)); // sort -1 descending || 1 ascending
+  } catch (err) {
+    const error = new HttpError(
+      "Could not fetch any products, please try again in few moments",
+      404
+    );
+    return next(error);
+  }
+
+  if (products.length === 0) {
+    const error = new HttpError("Could not fetch any products.", 422);
+    return next(error);
+  }
+
+  res.json({
+    products: products.map((product) => product.toObject({ getters: true })), page, pages: Math.ceil(count /pageSize) 
+  });
+};
+/* Get List of all products Sorted By Rating */
+
+const getTopProductsRating = async (req, res, next) => {
+
+  let products;
+  try {
+    products = await Product.find({}).sort({ Rating: -1 }).limit(21);
+  } catch (err) {
+    const error = new HttpError(
+      "Could not fetch any products, please try again in few moments",
+      404
+    );
+    return next(error);
+  }
+
+  if (products.length === 0) {
+    const error = new HttpError("Could not fetch any products.", 422);
+    return next(error);
+  }
+
+  res.json({
+    products: products.map((product) => product.toObject({ getters: true })) 
+  });
+};
+
 /* Get Product (Link) by user Id (User id) */
 
 const getProductsByUserId = async (req, res, next) => {
@@ -454,6 +536,9 @@ const deleteProduct = async (req, res, next) => {
 
 exports.getProductById = getProductById;
 exports.getAllProducts = getAllProducts;
+exports.getAllProductsHighPrice = getAllProductsHighPrice;
+exports.getAllProductsLowPrice = getAllProductsLowPrice;
+exports.getTopProductsRating = getTopProductsRating;
 exports.getProductsByUserId = getProductsByUserId;
 exports.createProduct = createProduct;
 exports.updateProduct = updateProduct;
