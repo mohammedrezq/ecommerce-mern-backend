@@ -14,7 +14,7 @@ router.get("/HighestPrice", productsController.getAllProductsHighPrice);
 
 router.get("/LowestPrice", productsController.getAllProductsLowPrice);
 
-/* Get List of all products by Low Prices */
+/* Get List of  Top Rated products */
 
 router.get("/TopRated", productsController.getTopProductsRating);
 
