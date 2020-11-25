@@ -35,7 +35,7 @@ const getProductById = async (req, res, next) => {
 /* Get List of all products */
 
 const getAllProducts = async (req, res, next) => {
-  const pageSize = 60;
+  const pageSize = 12;
   const page = Number(req.query.pageNumber) || 1;
   const keyword = req.query.keyword ? {
     Title: {
