@@ -63,11 +63,11 @@ app.use((error, req, res, next) => {
 
 // FROM .env
 const port = process.env.PORT || 5000;
-const database = process.env.DATABASE;
+// const database = process.env.DATABASE;
 
 try {
   mongoose
-    .connect(database, {
+    .connect(`mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASSWORD}@cluster0.ta9zh.mongodb.net/${process.env.DB_COLLECTION}?retryWrites=true&w=majority`, {
       useUnifiedTopology: true,
       useNewUrlParser: true,
       useCreateIndex: true,
