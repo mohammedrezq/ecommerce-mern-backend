@@ -89,7 +89,7 @@ router.post('/uploadImage', protect, adminstrator ,(req, res, next) => {
             imagePath = imageFile.path.replace(/\\/g, "/");
             // console.log(imageFile.filename)
             // console.log(imagePath)
-            return res.json({success: true, image: `${process.env.ASSET_URL}/${imagePath}`, fileName: imageFile.filename })
+            return res.json({success: true, image: `/${imagePath}`, fileName: imageFile.filename })
         })
         // const imagePath = res.req.file.path.replace(/\\/g, "/"); // make sure image link is OK slashed from: https://stackoverflow.com/questions/59393275/multer-req-files-path-not-editable
     })
